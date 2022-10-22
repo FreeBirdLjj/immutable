@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  - push
+  - pull_request
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+
+    name: format
+    runs-on: ubuntu-latest
+
+    container:
+      image: golang:latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Format
+      run: go fmt ./...
+    - name: Fix
+      run: go fix ./...
+    - name: Vet
+      run: go vet ./...
+    - name: Check changes
+      run: git diff-index --quiet HEAD
+
+  unit-test:
+
+    name: unit test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version:
+          - 1.18
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache: true
+
+      - name: Display Go version
+        run: go version
+
+      - name: Install dependencies
+        run: go get ./...
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Test
+        run: go test -v ./...
