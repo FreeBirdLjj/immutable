@@ -1,1 +1,3 @@
 #+TITLE: immutable
+
+[[https://pkg.go.dev/github.com/freebirdljj/immutable][https://pkg.go.dev/badge/github.com/freebirdljj/immutable.svg]]
