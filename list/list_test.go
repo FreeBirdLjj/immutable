@@ -170,6 +170,30 @@ func TestListAll(t *testing.T) {
 	})
 }
 
+func TestListAny(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]interface{}{
+		"xs.append(ys).any(p) == xs.any(p) or ys.any(p)": func(xs []int, ys []int) bool {
+			predicate := func(x int) bool { return x%100 < 90 }
+			xl := FromSlice(xs)
+			yl := FromSlice(ys)
+			return xl.Append(yl).Any(predicate) == (xl.Any(predicate) || yl.Any(predicate))
+		},
+		"cycle(xs).any(p) == xs.any(p)": func(xs []int, last int) bool {
+			predicate := func(x int) bool { return x%100 < 90 }
+			nonemptySlice := append(xs, last)
+			xl := FromSlice(nonemptySlice)
+			return Cycle(xl).Any(predicate) == xl.Any(predicate)
+		},
+		"repeat(x).any(p) == p(x)": func(x int) bool {
+			predicate := func(x int) bool { return x%100 < 90 }
+			return Repeat(x).Any(predicate) == predicate(x)
+		},
+	})
+}
+
 func checkProperties(t *testing.T, properties map[string]interface{}) {
 	for name, property := range properties {
 		name, property := name, property
