@@ -192,6 +192,22 @@ func (xs *List[T]) All(predicate func(T) bool) bool {
 	return true
 }
 
+func (xs *List[T]) Any(predicate func(T) bool) bool {
+	visited := make(map[*List[T]]bool)
+	for p := xs; p != nil; p = p.next {
+
+		if visited[p] {
+			return false
+		}
+		visited[p] = true
+
+		if predicate(p.value) {
+			return true
+		}
+	}
+	return false
+}
+
 // CAUTION: Only invoke `ToSlice()` with finite list.
 func (xs *List[T]) ToSlice() []T {
 
