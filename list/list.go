@@ -1,5 +1,9 @@
 package list
 
+import (
+	"github.com/freebirdljj/immutable/comparator"
+)
+
 type (
 	List[T any] struct {
 		value T
@@ -174,6 +178,43 @@ func (xs *List[T]) Filter(predicate func(T) bool) *List[T] {
 	}
 
 	return head.next
+}
+
+func (xs *List[T]) Sort(cmp comparator.Comparator[T]) *List[T] {
+
+	if xs == nil || xs.next == nil || xs.next == xs {
+		return xs
+	}
+
+	head, tail := xs.Uncons()
+	lessPart := tail.Filter(func(x T) bool { return cmp(x, head) < 0 }).Sort(cmp)
+
+	if !lessPart.isFinite() {
+		return lessPart
+	}
+
+	return lessPart.Append(Cons(head, tail.Filter(func(x T) bool { return cmp(x, head) >= 0 }).Sort(cmp)))
+}
+
+func (xs *List[T]) IsIsomorphicTo(ys *List[T], cmp comparator.Comparator[T]) bool {
+
+	xVisited := map[*List[T]]bool{nil: true}
+	yVisited := map[*List[T]]bool{nil: true}
+
+	for !xVisited[xs] || !yVisited[ys] {
+
+		if xs == nil || ys == nil || cmp(xs.value, ys.value) != 0 {
+			return false
+		}
+
+		xVisited[xs] = true
+		yVisited[ys] = true
+
+		xs = xs.next
+		ys = ys.next
+	}
+
+	return true
 }
 
 func (xs *List[T]) All(predicate func(T) bool) bool {
