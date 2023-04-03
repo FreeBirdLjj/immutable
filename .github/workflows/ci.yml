@@ -11,14 +11,19 @@ jobs:
   format:
 
     name: format
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version:
+          - 1.18
 
     steps:
     - uses: actions/checkout@v3
 
-    - name: Set up Go
+    - name: Set up Go ${{ matrix.go-version }}
       uses: actions/setup-go@v4
       with:
-        go-version: 1.18
+        go-version: ${{ matrix.go-version }}
 
     - name: Format
       run: go fmt ./...
