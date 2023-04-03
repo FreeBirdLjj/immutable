@@ -19,13 +19,11 @@ jobs:
             go-version:
               - 1.18
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.result }}
+      matrix: ${{ toJSON(matrix.data) }}
 
     steps:
-      - id: set-matrix
-        uses: actions/github-script@v6
-        with:
-          script: return ${{ toJSON(matrix.data) }}
+      # `steps` cannot be empty if the job's `uses` is not set
+      - run: true
 
   format:
 
