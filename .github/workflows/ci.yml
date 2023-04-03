@@ -17,7 +17,7 @@ jobs:
       image: golang:latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
     - name: Format
       run: go fmt ./...
     - name: Fix
