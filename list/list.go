@@ -76,6 +76,15 @@ func Map[T1 any, T2 any](xs *List[T1], f func(T1) T2) *List[T2] {
 	}
 }
 
+// CAUTION: Only invoke `Foldl` with finite list `xs`.
+func Foldl[T1 any, T2 any](xs *List[T1], init T2, f func(acc T2, x T1) T2) T2 {
+	res := init
+	for p := xs; p != nil; p = p.next {
+		res = f(res, p.value)
+	}
+	return res
+}
+
 // CAUTION: `xs` can't be nil.
 func (xs *List[T]) Uncons() (value T, next *List[T]) {
 	return xs.value, xs.next
