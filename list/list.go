@@ -2,6 +2,7 @@ package list
 
 import (
 	"github.com/freebirdljj/immutable/comparator"
+	immutable_func "github.com/freebirdljj/immutable/func"
 )
 
 type (
@@ -83,6 +84,19 @@ func Foldl[T1 any, T2 any](xs *List[T1], init T2, f func(acc T2, x T1) T2) T2 {
 		res = f(res, p.value)
 	}
 	return res
+}
+
+// CAUTION: Only invoke `Foldr` with finite list `xs`.
+func Foldr[T1 any, T2 any](xs *List[T1], init T2, f func(x T1, acc T2) T2) T2 {
+	return Foldl(
+		xs,
+		immutable_func.Identity[T2],
+		func(folded func(acc T2) T2, value T1) func(acc T2) T2 {
+			return func(acc T2) T2 {
+				return folded(f(value, acc))
+			}
+		},
+	)(init)
 }
 
 // CAUTION: `xs` can't be nil.
