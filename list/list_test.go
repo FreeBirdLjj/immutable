@@ -182,6 +182,26 @@ func TestListSort(t *testing.T) {
 	})
 }
 
+func TestListReverse(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"xs.reverse().length() == xs.length()": func(xs []int) bool {
+			xl := FromSlice(xs)
+			return xl.Reverse().Length() == len(xs)
+		},
+		"xs.reverse().reverse() == xs": func(xs []int) bool {
+			xl := FromSlice(xs)
+			return slicesEqual(xl.Reverse().Reverse().ToSlice(), xs)
+		},
+		"cons(x, xs).reverse() == xs.reverse().append([x])": func(xs []int, x int) bool {
+			xl := FromSlice(xs)
+			return slicesEqual(Cons(x, xl).Reverse().ToSlice(), append(xl.Reverse().ToSlice(), x))
+		},
+	})
+}
+
 func TestListIsIsomorphicTo(t *testing.T) {
 
 	t.Parallel()

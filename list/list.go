@@ -196,6 +196,14 @@ func (xs *List[T]) Sort(cmp comparator.Comparator[T]) *List[T] {
 	return lessPart.Append(Cons(head, tail.Filter(func(x T) bool { return cmp(x, head) >= 0 }).Sort(cmp)))
 }
 
+func (xs *List[T]) Reverse() *List[T] {
+	res := (*List[T])(nil)
+	for p := xs; p != nil; p = p.next {
+		res = Cons(p.value, res)
+	}
+	return res
+}
+
 func (xs *List[T]) IsIsomorphicTo(ys *List[T], cmp comparator.Comparator[T]) bool {
 
 	xVisited := map[*List[T]]bool{nil: true}
