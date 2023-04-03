@@ -11,19 +11,24 @@ jobs:
   format:
 
     name: format
-    runs-on: ubuntu-latest
-
-    container:
-      image: golang:latest
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.18
+
     - name: Format
       run: go fmt ./...
+
     - name: Fix
       run: go fix ./...
+
     - name: Vet
       run: go vet ./...
+
     - name: Check changes
       run: git diff-index --quiet HEAD
 
