@@ -76,6 +76,18 @@ func TestFoldl(t *testing.T) {
 	})
 }
 
+func TestFoldr(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"xs.foldr([], cons) == xs": func(xs []int) bool {
+			xl := FromSlice(xs)
+			return slicesEqual(Foldr(xl, nil, Cons[int]).ToSlice(), xs)
+		},
+	})
+}
+
 func TestListAppend(t *testing.T) {
 
 	t.Parallel()
