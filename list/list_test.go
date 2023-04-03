@@ -64,6 +64,18 @@ func TestMap(t *testing.T) {
 	})
 }
 
+func TestFoldl(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"xs.foldl([], flip(cons)).reverse() == xs": func(xs []int) bool {
+			xl := FromSlice(xs)
+			return slicesEqual(Foldl(xl, nil, func(acc *List[int], x int) *List[int] { return Cons(x, acc) }).Reverse().ToSlice(), xs)
+		},
+	})
+}
+
 func TestListAppend(t *testing.T) {
 
 	t.Parallel()
