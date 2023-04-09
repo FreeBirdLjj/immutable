@@ -37,44 +37,24 @@ func Repeat[T any](x T) *List[T] {
 
 // CAUTION: `xs` can't be nil.
 func Cycle[T any](xs *List[T]) *List[T] {
-
-	first := *xs
-	nodeMap := map[*List[T]]*List[T]{
-		xs:  &first,
-		nil: &first,
-	}
-
-	for p := &first; ; p = p.next {
-		if mappedNode, mapped := nodeMap[p.next]; mapped {
-			p.next = mappedNode
-			return &first
+	first := Cons(xs.value, nil)
+	return maplist(xs, func(p *List[T]) *List[T] {
+		if p == nil || p == xs {
+			return first
 		}
-		newNode := *p.next
-		nodeMap[p.next] = &newNode
-		p.next = &newNode
-	}
+		return Cons(p.value, nil)
+	})
 }
 
 func Map[T1 any, T2 any](xs *List[T1], f func(T1) T2) *List[T2] {
-
-	head := List[T2]{}
-	prev := &head
-	nodeMap := map[*List[T1]]*List[T2]{
-		nil: nil,
-	}
-
-	for p := xs; ; p = p.next {
-		if mappedNode, mapped := nodeMap[p]; mapped {
-			prev.next = mappedNode
-			return head.next
+	return maplist(xs, func(p *List[T1]) *List[T2] {
+		if p == nil {
+			return nil
 		}
-		newNode := List[T2]{
+		return &List[T2]{
 			value: f(p.value),
 		}
-		nodeMap[p] = &newNode
-		prev.next = &newNode
-		prev = &newNode
-	}
+	})
 }
 
 // CAUTION: Only invoke `Foldl` with finite list `xs`.
@@ -99,6 +79,7 @@ func Foldr[T1 any, T2 any](xs *List[T1], init T2, f func(x T1, acc T2) T2) T2 {
 	)(init)
 }
 
+// NOTE: The `next` field of the last node of the list returned by `f` may be modified
 func maplist[T1 any, T2 any](xs *List[T1], f func(*List[T1]) *List[T2]) *List[T2] {
 
 	head := List[T2]{}
@@ -106,13 +87,27 @@ func maplist[T1 any, T2 any](xs *List[T1], f func(*List[T1]) *List[T2]) *List[T2
 	nodeMap := make(map[*List[T1]]*List[T2])
 
 	for p := xs; p != nil; p = p.next {
+
 		if mappedNode, mapped := nodeMap[p]; mapped {
-			prev.next = mappedNode
+			// NOTE: For the second lap run, skip all nodes mapped to `nil`.
+			if mappedNode != nil {
+				prev.next = mappedNode
+				return head.next
+			}
+			circleEntry := p
+			for p = p.next; p != circleEntry; p = p.next {
+				if mappedNode := nodeMap[p]; mappedNode != nil {
+					prev.next = nodeMap[p]
+					return head.next
+				}
+			}
 			return head.next
 		}
+
 		newNode := f(p)
 		nodeMap[p] = newNode
 		prev.next = newNode
+
 		for prev.next != nil {
 			prev = prev.next
 		}
@@ -147,22 +142,12 @@ func (xs *List[T]) Append(ys *List[T]) *List[T] {
 		return xs
 	}
 
-	head := List[T]{
-		next: xs,
-	}
-	nodeMap := map[*List[T]]*List[T]{
-		nil: ys,
-	}
-
-	for p := &head; ; p = p.next {
-		if mappedNode, mapped := nodeMap[p.next]; mapped {
-			p.next = mappedNode
-			return head.next
+	return maplist(xs, func(p *List[T]) *List[T] {
+		if p == nil {
+			return ys
 		}
-		newNode := *p.next
-		nodeMap[p.next] = &newNode
-		p.next = &newNode
-	}
+		return Cons(p.value, nil)
+	})
 }
 
 func (xs *List[T]) Take(n int) *List[T] {
@@ -184,46 +169,12 @@ func (xs *List[T]) Drop(n int) *List[T] {
 }
 
 func (xs *List[T]) Filter(predicate func(T) bool) *List[T] {
-
-	nodeMap := map[*List[T]]*List[T]{
-		nil: nil,
-	}
-
-	head := List[T]{}
-	prev := &head
-
-	for p := xs; p != nil; p = p.next {
-
-		if mappedNode, mapped := nodeMap[p]; mapped {
-			// NOTE: For the second lap run, avoid repeatedly running the predicate at the same node.
-			//       predicate(p.value) <=> nodeMap[p] != nil
-			if mappedNode != nil {
-				prev.next = mappedNode
-				break
-			}
-			circleEntry := p
-			for p = p.next; p != circleEntry; p = p.next {
-				if mappedNode := nodeMap[p]; mappedNode != nil {
-					prev.next = nodeMap[p]
-					break
-				}
-			}
-			break
+	return maplist(xs, func(p *List[T]) *List[T] {
+		if p == nil || !predicate(p.value) {
+			return nil
 		}
-
-		if predicate(p.value) {
-			pCopy := List[T]{
-				value: p.value,
-			}
-			nodeMap[p] = &pCopy
-			prev.next = &pCopy
-			prev = &pCopy
-		} else {
-			nodeMap[p] = nil
-		}
-	}
-
-	return head.next
+		return Cons(p.value, nil)
+	})
 }
 
 func (xs *List[T]) Sort(cmp comparator.Comparator[T]) *List[T] {
