@@ -98,6 +98,12 @@ func TestListAppend(t *testing.T) {
 			yl := FromSlice(ys)
 			return slicesEqual(xl.Append(yl).ToSlice(), append(xs, ys...))
 		},
+		"cycle(xs).append(ys) == cycle(xs)": func(xs []int, ys []int, xLast int) bool {
+			nonemptySliceX := append(xs, xLast)
+			xl := FromSlice(nonemptySliceX)
+			yl := FromSlice(ys)
+			return Cycle(xl).Append(yl).IsIsomorphicTo(Cycle(xl), comparator.OrderedComparator[int])
+		},
 	})
 }
 
