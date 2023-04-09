@@ -51,9 +51,7 @@ func Map[T1 any, T2 any](xs *List[T1], f func(T1) T2) *List[T2] {
 		if p == nil {
 			return nil
 		}
-		return &List[T2]{
-			value: f(p.value),
-		}
+		return Cons(f(p.value), nil)
 	})
 }
 
@@ -77,6 +75,15 @@ func Foldr[T1 any, T2 any](xs *List[T1], init T2, f func(x T1, acc T2) T2) T2 {
 			}
 		},
 	)(init)
+}
+
+func Concat[T any](xss *List[*List[T]]) *List[T] {
+	return maplist(xss, func(p *List[*List[T]]) *List[T] {
+		if p == nil {
+			return nil
+		}
+		return p.value.clone()
+	})
 }
 
 // NOTE: The `next` field of the last node of the list returned by `f` may be modified
@@ -280,6 +287,15 @@ func (xs *List[T]) ToSlice() []T {
 		res = append(res, p.value)
 	}
 	return res
+}
+
+func (xs *List[T]) clone() *List[T] {
+	return maplist(xs, func(p *List[T]) *List[T] {
+		if p == nil {
+			return nil
+		}
+		return Cons(p.value, nil)
+	})
 }
 
 func (xs *List[T]) isFinite() bool {
