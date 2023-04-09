@@ -226,6 +226,40 @@ func TestListReverse(t *testing.T) {
 	})
 }
 
+func TestListIntersperse(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"[].intersperse(sep) == []": func(sep int) bool {
+			return (*List[int])(nil).Intersperse(sep) == nil
+		},
+		"[x].intersperse(sep) == [x]": func(x int, sep int) bool {
+			return slicesEqual(FromSlice([]int{x}).Intersperse(sep).ToSlice(), []int{x})
+		},
+		"cons(x, xs).intersperse(sep) == [x, sep] ++ xs.intersperse(sep)": func(xs []int, last int, x int, sep int) bool {
+			nonemptySlice := append(xs, last)
+			xl := FromSlice(nonemptySlice)
+			return slicesEqual(Cons(x, xl).Intersperse(sep).ToSlice(), FromSlice([]int{x, sep}).Append(xl.Intersperse(sep)).ToSlice())
+		},
+		"repeat(x).intersperse(sep) == cycle([x, sep])": func(x int, sep int) bool {
+			return Repeat(x).Intersperse(sep).IsIsomorphicTo(Cycle(FromSlice([]int{x, sep})), comparator.OrderedComparator[int])
+		},
+		"cycle(cons(x, xs)).intersperse(sep) == cycle([x, sep] ++ xs.intersperse(sep) ++ [sep])": func(xs []int, last int, x int, sep int) bool {
+			nonemptySlice := append(xs, last)
+			xl := FromSlice(nonemptySlice)
+			return Cycle(Cons(x, xl)).Intersperse(sep).IsIsomorphicTo(Cycle(FromSlice([]int{x, sep}).Append(xl.Intersperse(sep)).Append(FromSlice([]int{sep}))), comparator.OrderedComparator[int])
+		},
+		"xs.append(cycle(ys)).intersperse(sep) == xs.intersperse(sep) ++ cons(sep, cycle(ys).intersperse(sep))": func(xs []int, ys []int, xLast int, yLast int, sep int) bool {
+			nonemptySliceX := append(xs, xLast)
+			nonemptySliceY := append(ys, yLast)
+			xl := FromSlice(nonemptySliceX)
+			yl := FromSlice(nonemptySliceY)
+			return xl.Append(Cycle(yl)).Intersperse(sep).IsIsomorphicTo(xl.Intersperse(sep).Append(Cons(sep, Cycle(yl).Intersperse(sep))), comparator.OrderedComparator[int])
+		},
+	})
+}
+
 func TestListIsIsomorphicTo(t *testing.T) {
 
 	t.Parallel()
@@ -293,7 +327,7 @@ func TestListAny(t *testing.T) {
 	})
 }
 
-func checkProperties(t *testing.T, properties map[string]interface{}) {
+func checkProperties(t *testing.T, properties map[string]any) {
 	for name, property := range properties {
 		name, property := name, property
 		t.Run(name, func(t *testing.T) {

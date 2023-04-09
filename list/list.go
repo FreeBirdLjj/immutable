@@ -99,6 +99,29 @@ func Foldr[T1 any, T2 any](xs *List[T1], init T2, f func(x T1, acc T2) T2) T2 {
 	)(init)
 }
 
+func maplist[T1 any, T2 any](xs *List[T1], f func(*List[T1]) *List[T2]) *List[T2] {
+
+	head := List[T2]{}
+	prev := &head
+	nodeMap := make(map[*List[T1]]*List[T2])
+
+	for p := xs; p != nil; p = p.next {
+		if mappedNode, mapped := nodeMap[p]; mapped {
+			prev.next = mappedNode
+			return head.next
+		}
+		newNode := f(p)
+		nodeMap[p] = newNode
+		prev.next = newNode
+		for prev.next != nil {
+			prev = prev.next
+		}
+	}
+
+	prev.next = f(nil)
+	return head.next
+}
+
 // CAUTION: `xs` can't be nil.
 func (xs *List[T]) Uncons() (value T, next *List[T]) {
 	return xs.value, xs.next
@@ -225,6 +248,20 @@ func (xs *List[T]) Reverse() *List[T] {
 		res = Cons(p.value, res)
 	}
 	return res
+}
+
+func (xs *List[T]) Intersperse(sep T) *List[T] {
+	return maplist(xs, func(p *List[T]) *List[T] {
+		if p == nil || p.next == nil {
+			return p
+		}
+		return &List[T]{
+			value: p.value,
+			next: &List[T]{
+				value: sep,
+			},
+		}
+	})
 }
 
 func (xs *List[T]) IsIsomorphicTo(ys *List[T], cmp comparator.Comparator[T]) bool {
