@@ -88,6 +88,22 @@ func TestFoldr(t *testing.T) {
 	})
 }
 
+func TestConcat(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"concat([[]] * N) == []": func(n uint) bool {
+			n %= 100
+			return Concat(Repeat((*List[int])(nil))).Take(int(n)) == nil
+		},
+		"concat(xss) == xss.foldl([], ++)": func(xss [][]int) bool {
+			xll := Map(FromSlice(xss), FromSlice[int])
+			return slicesEqual(Concat(xll).ToSlice(), Foldl(xll, (*List[int])(nil), (*List[int]).Append).ToSlice())
+		},
+	})
+}
+
 func TestListAppend(t *testing.T) {
 
 	t.Parallel()
