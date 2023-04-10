@@ -101,6 +101,16 @@ func TestConcat(t *testing.T) {
 			xll := Map(FromSlice(xss), FromSlice[int])
 			return slicesEqual(Concat(xll).ToSlice(), Foldl(xll, (*List[int])(nil), (*List[int]).Append).ToSlice())
 		},
+		"concat(repeat(xs)) == cycle(xs)": func(xs []int, last int) bool {
+			nonemptySlice := append(xs, last)
+			xl := FromSlice(nonemptySlice)
+			return Concat(Repeat(xl)).IsIsomorphicTo(Cycle(xl), comparator.OrderedComparator[int])
+		},
+		"concat([cycle(xs)]) == cycle(xs)": func(xs []int, last int) bool {
+			nonemptySlice := append(xs, last)
+			xl := FromSlice(nonemptySlice)
+			return Concat(Cons(Cycle(xl), nil)).IsIsomorphicTo(Cycle(xl), comparator.OrderedComparator[int])
+		},
 	})
 }
 

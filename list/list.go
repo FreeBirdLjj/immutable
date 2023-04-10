@@ -115,6 +115,10 @@ func maplist[T1 any, T2 any](xs *List[T1], f func(*List[T1]) *List[T2]) *List[T2
 		nodeMap[p] = newNode
 		prev.next = newNode
 
+		if !prev.isFinite() {
+			return head.next
+		}
+
 		for prev.next != nil {
 			prev = prev.next
 		}
