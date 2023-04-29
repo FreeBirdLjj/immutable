@@ -67,7 +67,7 @@ func TestMapInsert(t *testing.T) {
 			kvs[i], kvs[j] = kvs[j], kvs[i]
 		})
 
-		m := NewMapFromKeyValuePairs(comparator.OrderedComparator[int], kvs...)
+		m := FromKeyValuePairs(comparator.OrderedComparator[int], kvs...)
 
 		r.Shuffle(len(overriddenKVs), func(i int, j int) {
 			overriddenKVs[i], overriddenKVs[j] = overriddenKVs[j], overriddenKVs[i]
@@ -109,7 +109,7 @@ func TestMapDelete(t *testing.T) {
 			kvs[i], kvs[j] = kvs[j], kvs[i]
 		})
 
-		m := NewMapFromKeyValuePairs(comparator.OrderedComparator[int], kvs...)
+		m := FromKeyValuePairs(comparator.OrderedComparator[int], kvs...)
 
 		for _, kv := range kvs {
 
@@ -140,7 +140,7 @@ func TestMapDelete(t *testing.T) {
 			kvs[i], kvs[j] = kvs[j], kvs[i]
 		})
 
-		m := NewMapFromKeyValuePairs(comparator.OrderedComparator[int], kvs...)
+		m := FromKeyValuePairs(comparator.OrderedComparator[int], kvs...)
 
 		for _, kv := range kvs {
 
