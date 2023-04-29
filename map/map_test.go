@@ -32,7 +32,7 @@ func TestMapInsert(t *testing.T) {
 			kvs[i], kvs[j] = kvs[j], kvs[i]
 		})
 
-		m := NewMap[int, string](comparator.OrderedComparator[int])
+		m := New[int, string](comparator.OrderedComparator[int])
 		for _, kv := range kvs {
 			m, _ = m.Insert(kv.Key, kv.Value)
 		}
