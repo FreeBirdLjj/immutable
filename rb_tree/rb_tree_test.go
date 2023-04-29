@@ -99,7 +99,7 @@ func TestRBTreeDelete(t *testing.T) {
 			values[i], values[j] = values[j], values[i]
 		})
 
-		rbTree := NewRBTreeFromValues(strings.Compare, values...)
+		rbTree := FromValues(strings.Compare, values...)
 
 		r.Shuffle(len(values), func(i int, j int) {
 			values[i], values[j] = values[j], values[i]
@@ -136,7 +136,7 @@ func TestRBTreeDelete(t *testing.T) {
 			values[i], values[j] = values[j], values[i]
 		})
 
-		rbTree := NewRBTreeFromValues(strings.Compare, values...)
+		rbTree := FromValues(strings.Compare, values...)
 
 		newRBTree, affected := rbTree.Delete(nonExistingValue)
 		assert.False(t, affected)
