@@ -15,7 +15,7 @@ func NewSet[Value any](cmp comparator.Comparator[Value]) *Set[Value] {
 }
 
 func NewSetFromValues[Value any](cmp comparator.Comparator[Value], values ...Value) *Set[Value] {
-	return (*Set[Value])(immutable_rb_tree.NewRBTreeFromValues(cmp, values...))
+	return (*Set[Value])(immutable_rb_tree.FromValues(cmp, values...))
 }
 
 func (s *Set[Value]) Values() []Value {

@@ -50,8 +50,8 @@ func New[Value any](cmp comparator.Comparator[Value]) *RBTree[Value] {
 	}
 }
 
-func NewRBTreeFromValues[Value any](cmp comparator.Comparator[Value], values ...Value) *RBTree[Value] {
-	rbTree := New[Value](cmp)
+func FromValues[Value any](cmp comparator.Comparator[Value], values ...Value) *RBTree[Value] {
+	rbTree := New(cmp)
 	for _, value := range values {
 		rbTree, _ = rbTree.Insert(value)
 	}
