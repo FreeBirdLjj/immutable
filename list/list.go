@@ -279,8 +279,8 @@ func (xs *List[T]) Any(predicate func(T) bool) bool {
 	return false
 }
 
-// CAUTION: Only invoke `ToSlice()` with finite list.
-func (xs *List[T]) ToSlice() []T {
+// CAUTION: Only invoke `ToGoSlice()` with finite list.
+func (xs *List[T]) ToGoSlice() []T {
 
 	if xs == nil {
 		return nil
