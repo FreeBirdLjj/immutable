@@ -10,7 +10,7 @@ type (
 	Set[Value any] immutable_rb_tree.RBTree[Value]
 )
 
-func NewSet[Value any](cmp comparator.Comparator[Value]) *Set[Value] {
+func New[Value any](cmp comparator.Comparator[Value]) *Set[Value] {
 	return (*Set[Value])(immutable_rb_tree.New(cmp))
 }
 
