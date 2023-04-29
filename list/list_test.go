@@ -27,13 +27,13 @@ func TestCycle(t *testing.T) {
 		"cycle(xs).take(2 * xs.length()) == xs ++ xs": func(xs []int, last int) bool {
 			nonemptySlice := append(xs, last)
 			xl := FromGoSlice(nonemptySlice)
-			return slicesEqual(Cycle(xl).Take(2*len(nonemptySlice)).ToSlice(), append(nonemptySlice, nonemptySlice...))
+			return slicesEqual(Cycle(xl).Take(2*len(nonemptySlice)).ToGoSlice(), append(nonemptySlice, nonemptySlice...))
 		},
 		"cycle of an infinite list will be the same": func(prefixes []int, xs []int, last int) bool {
 			nonemptySlice := append(xs, last)
 			xl := Cycle(FromGoSlice(nonemptySlice))
 			sampleLen := len(prefixes) + 2*len(nonemptySlice)
-			return slicesEqual(Cycle(xl).Take(sampleLen).ToSlice(), xl.Take(sampleLen).ToSlice())
+			return slicesEqual(Cycle(xl).Take(sampleLen).ToGoSlice(), xl.Take(sampleLen).ToGoSlice())
 		},
 	})
 }
@@ -53,13 +53,13 @@ func TestMap(t *testing.T) {
 			nonemptySlice := append(xs, last)
 			xl := FromGoSlice(nonemptySlice)
 			sampleLen := 2 * (len(xs) + 1)
-			return slicesEqual(Map(Cycle(xl), f).Take(sampleLen).ToSlice(), Cycle(Map(xl, f)).Take(sampleLen).ToSlice())
+			return slicesEqual(Map(Cycle(xl), f).Take(sampleLen).ToGoSlice(), Cycle(Map(xl, f)).Take(sampleLen).ToGoSlice())
 		},
 		"xs.map(f1).map(f2) == xs.map(f2 . f1)": func(xs []int) bool {
 			f1 := func(x int) int { return x + 1 }
 			f2 := strconv.Itoa
 			xl := FromGoSlice(xs)
-			return slicesEqual(Map(Map(xl, f1), f2).ToSlice(), Map(xl, func(x int) string { return f2(f1(x)) }).ToSlice())
+			return slicesEqual(Map(Map(xl, f1), f2).ToGoSlice(), Map(xl, func(x int) string { return f2(f1(x)) }).ToGoSlice())
 		},
 	})
 }
@@ -71,7 +71,7 @@ func TestFoldl(t *testing.T) {
 	checkProperties(t, map[string]any{
 		"xs.foldl([], flip(cons)).reverse() == xs": func(xs []int) bool {
 			xl := FromGoSlice(xs)
-			return slicesEqual(Foldl(xl, nil, func(acc *List[int], x int) *List[int] { return Cons(x, acc) }).Reverse().ToSlice(), xs)
+			return slicesEqual(Foldl(xl, nil, func(acc *List[int], x int) *List[int] { return Cons(x, acc) }).Reverse().ToGoSlice(), xs)
 		},
 	})
 }
@@ -83,7 +83,7 @@ func TestFoldr(t *testing.T) {
 	checkProperties(t, map[string]any{
 		"xs.foldr([], cons) == xs": func(xs []int) bool {
 			xl := FromGoSlice(xs)
-			return slicesEqual(Foldr(xl, nil, Cons[int]).ToSlice(), xs)
+			return slicesEqual(Foldr(xl, nil, Cons[int]).ToGoSlice(), xs)
 		},
 	})
 }
@@ -99,7 +99,7 @@ func TestConcat(t *testing.T) {
 		},
 		"concat(xss) == xss.foldl([], ++)": func(xss [][]int) bool {
 			xll := Map(FromGoSlice(xss), FromGoSlice[int])
-			return slicesEqual(Concat(xll).ToSlice(), Foldl(xll, (*List[int])(nil), (*List[int]).Append).ToSlice())
+			return slicesEqual(Concat(xll).ToGoSlice(), Foldl(xll, (*List[int])(nil), (*List[int]).Append).ToGoSlice())
 		},
 		"concat(repeat(xs)) == cycle(xs)": func(xs []int, last int) bool {
 			nonemptySlice := append(xs, last)
@@ -122,7 +122,7 @@ func TestListAppend(t *testing.T) {
 		"xs.append(ys) == xs ++ ys": func(xs []int, ys []int) bool {
 			xl := FromGoSlice(xs)
 			yl := FromGoSlice(ys)
-			return slicesEqual(xl.Append(yl).ToSlice(), append(xs, ys...))
+			return slicesEqual(xl.Append(yl).ToGoSlice(), append(xs, ys...))
 		},
 		"cycle(xs).append(ys) == cycle(xs)": func(xs []int, ys []int, xLast int) bool {
 			nonemptySliceX := append(xs, xLast)
@@ -141,12 +141,12 @@ func TestListTake(t *testing.T) {
 		"xs.append(ys).take(xs.length()) == xs": func(xs []int, ys []int) bool {
 			xl := FromGoSlice(xs)
 			yl := FromGoSlice(ys)
-			return slicesEqual(xl.Append(yl).Take(len(xs)).ToSlice(), xs)
+			return slicesEqual(xl.Append(yl).Take(len(xs)).ToGoSlice(), xs)
 		},
 		"xs.take(n) == xs if n >= xs.length()": func(xs []int, delta uint8) bool {
 			n := len(xs) + int(delta)
 			xl := FromGoSlice(xs)
-			return slicesEqual(xl.Take(n).ToSlice(), xs)
+			return slicesEqual(xl.Take(n).ToGoSlice(), xs)
 		},
 	})
 }
@@ -159,7 +159,7 @@ func TestListDrop(t *testing.T) {
 		"xs.append(ys).drop(xs.length()) == ys": func(xs []int, ys []int) bool {
 			xl := FromGoSlice(xs)
 			yl := FromGoSlice(ys)
-			return slicesEqual(xl.Append(yl).Drop(len(xs)).ToSlice(), ys)
+			return slicesEqual(xl.Append(yl).Drop(len(xs)).ToGoSlice(), ys)
 		},
 		"xs.drop(n) == nil if n >= xs.length()": func(xs []int, delta uint8) bool {
 			n := len(xs) + int(delta)
@@ -178,7 +178,7 @@ func TestListFilter(t *testing.T) {
 			predicate := func(x int) bool { return x%2 == 0 }
 			xl := FromGoSlice(xs)
 			yl := FromGoSlice(ys)
-			return reflect.DeepEqual(xl.Filter(predicate).Append(yl.Filter(predicate)).ToSlice(), xl.Append(yl).Filter(predicate).ToSlice())
+			return reflect.DeepEqual(xl.Filter(predicate).Append(yl.Filter(predicate)).ToGoSlice(), xl.Append(yl).Filter(predicate).ToGoSlice())
 		},
 		"xs.filter(konst(false)) == nil": func(xs []int) bool {
 			predicate := immutable_func.Konst[int](false)
@@ -194,13 +194,13 @@ func TestListFilter(t *testing.T) {
 		"xs.filter(konst(true)) == xs": func(xs []int) bool {
 			predicate := immutable_func.Konst[int](true)
 			xl := FromGoSlice(xs)
-			return slicesEqual(xl.Filter(predicate).ToSlice(), xs)
+			return slicesEqual(xl.Filter(predicate).ToGoSlice(), xs)
 		},
 		"cycle(xs).filter(konst(true)) == cycle(xs)": func(xs []int, last int) bool {
 			predicate := immutable_func.Konst[int](true)
 			nonemptySlice := append(xs, last)
 			xl := FromGoSlice(nonemptySlice)
-			return slicesEqual(Cycle(xl).Filter(predicate).Take(2*len(nonemptySlice)).ToSlice(), append(nonemptySlice, nonemptySlice...))
+			return slicesEqual(Cycle(xl).Filter(predicate).Take(2*len(nonemptySlice)).ToGoSlice(), append(nonemptySlice, nonemptySlice...))
 		},
 	})
 }
@@ -217,7 +217,7 @@ func TestListSort(t *testing.T) {
 			sort.Sort(sort.IntSlice(sortedXs))
 
 			xl := FromGoSlice(xs)
-			return slicesEqual(xl.Sort(comparator.OrderedComparator[int]).ToSlice(), sortedXs)
+			return slicesEqual(xl.Sort(comparator.OrderedComparator[int]).ToGoSlice(), sortedXs)
 		},
 		"sort(xs ++ cycle(ys)) == sort([x | x <- xs, x < min(ys)]) ++ repeat(min(ys))": func(xs []int, ys []int, last int) bool {
 			nonemptySlice := append(ys, last)
@@ -249,11 +249,11 @@ func TestListReverse(t *testing.T) {
 		},
 		"xs.reverse().reverse() == xs": func(xs []int) bool {
 			xl := FromGoSlice(xs)
-			return slicesEqual(xl.Reverse().Reverse().ToSlice(), xs)
+			return slicesEqual(xl.Reverse().Reverse().ToGoSlice(), xs)
 		},
 		"cons(x, xs).reverse() == xs.reverse().append([x])": func(xs []int, x int) bool {
 			xl := FromGoSlice(xs)
-			return slicesEqual(Cons(x, xl).Reverse().ToSlice(), append(xl.Reverse().ToSlice(), x))
+			return slicesEqual(Cons(x, xl).Reverse().ToGoSlice(), append(xl.Reverse().ToGoSlice(), x))
 		},
 	})
 }
@@ -267,12 +267,12 @@ func TestListIntersperse(t *testing.T) {
 			return (*List[int])(nil).Intersperse(sep) == nil
 		},
 		"[x].intersperse(sep) == [x]": func(x int, sep int) bool {
-			return slicesEqual(FromGoSlice([]int{x}).Intersperse(sep).ToSlice(), []int{x})
+			return slicesEqual(FromGoSlice([]int{x}).Intersperse(sep).ToGoSlice(), []int{x})
 		},
 		"cons(x, xs).intersperse(sep) == [x, sep] ++ xs.intersperse(sep)": func(xs []int, last int, x int, sep int) bool {
 			nonemptySlice := append(xs, last)
 			xl := FromGoSlice(nonemptySlice)
-			return slicesEqual(Cons(x, xl).Intersperse(sep).ToSlice(), FromGoSlice([]int{x, sep}).Append(xl.Intersperse(sep)).ToSlice())
+			return slicesEqual(Cons(x, xl).Intersperse(sep).ToGoSlice(), FromGoSlice([]int{x, sep}).Append(xl.Intersperse(sep)).ToGoSlice())
 		},
 		"repeat(x).intersperse(sep) == cycle([x, sep])": func(x int, sep int) bool {
 			return Repeat(x).Intersperse(sep).IsIsomorphicTo(Cycle(FromGoSlice([]int{x, sep})), comparator.OrderedComparator[int])
