@@ -19,7 +19,7 @@ func Cons[T any](x T, xs *List[T]) *List[T] {
 	}
 }
 
-func FromSlice[T any](xs []T) *List[T] {
+func FromGoSlice[T any](xs []T) *List[T] {
 	l := (*List[T])(nil)
 	for i := range xs {
 		l = Cons(xs[len(xs)-1-i], l)
@@ -167,7 +167,7 @@ func (xs *List[T]) Take(n int) *List[T] {
 		res = append(res, p.value)
 		n--
 	}
-	return FromSlice(res)
+	return FromGoSlice(res)
 }
 
 func (xs *List[T]) Drop(n int) *List[T] {
