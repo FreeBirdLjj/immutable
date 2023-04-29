@@ -31,7 +31,7 @@ func TestRBTreeInsert(t *testing.T) {
 			values[i], values[j] = values[j], values[i]
 		})
 
-		rbTree := NewRBTree(strings.Compare)
+		rbTree := New(strings.Compare)
 		for _, value := range values {
 
 			newRBTree, affected := rbTree.Insert(value)
@@ -54,7 +54,7 @@ func TestRBTreeInsert(t *testing.T) {
 
 		N := 10
 
-		rbTree := NewRBTree(func(l int, r int) int { return (l % N) - (r % N) })
+		rbTree := New(func(l int, r int) int { return (l % N) - (r % N) })
 
 		for i := 0; i < N; i++ {
 			rbTree, _ = rbTree.Insert(i)

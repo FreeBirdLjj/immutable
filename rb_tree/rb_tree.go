@@ -41,7 +41,7 @@ const (
 	directionNum
 )
 
-func NewRBTree[Value any](cmp comparator.Comparator[Value]) *RBTree[Value] {
+func New[Value any](cmp comparator.Comparator[Value]) *RBTree[Value] {
 	return &RBTree[Value]{
 		cmp: cmp,
 		doubleBlackLeaf: &node[Value]{
@@ -51,7 +51,7 @@ func NewRBTree[Value any](cmp comparator.Comparator[Value]) *RBTree[Value] {
 }
 
 func NewRBTreeFromValues[Value any](cmp comparator.Comparator[Value], values ...Value) *RBTree[Value] {
-	rbTree := NewRBTree[Value](cmp)
+	rbTree := New[Value](cmp)
 	for _, value := range values {
 		rbTree, _ = rbTree.Insert(value)
 	}

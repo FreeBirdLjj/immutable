@@ -16,7 +16,7 @@ type (
 )
 
 func NewMap[Key any, Value any](cmp comparator.Comparator[Key]) *Map[Key, Value] {
-	return (*Map[Key, Value])(immutable_rb_tree.NewRBTree(
+	return (*Map[Key, Value])(immutable_rb_tree.New(
 		func(l KeyValuePair[Key, Value], r KeyValuePair[Key, Value]) int {
 			return cmp(l.Key, r.Key)
 		},
