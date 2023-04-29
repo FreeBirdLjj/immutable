@@ -31,7 +31,7 @@ func TestSetInsert(t *testing.T) {
 			values[i], values[j] = values[j], values[i]
 		})
 
-		s := NewSet(strings.Compare)
+		s := New(strings.Compare)
 		for _, value := range values {
 			s, _ = s.Insert(value)
 		}
