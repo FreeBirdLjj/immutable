@@ -23,6 +23,14 @@ func New[Key any, Value any](cmp comparator.Comparator[Key]) *Map[Key, Value] {
 	))
 }
 
+func FromGoMap[Key comparable, Value any](cmp comparator.Comparator[Key], goMap map[Key]Value) *Map[Key, Value] {
+	m := New[Key, Value](cmp)
+	for k, v := range goMap {
+		m, _ = m.Insert(k, v)
+	}
+	return m
+}
+
 func FromKeyValuePairs[Key any, Value any](cmp comparator.Comparator[Key], kvPairs ...KeyValuePair[Key, Value]) *Map[Key, Value] {
 	return (*Map[Key, Value])(immutable_rb_tree.FromValues(
 		func(l KeyValuePair[Key, Value], r KeyValuePair[Key, Value]) int {
@@ -30,6 +38,14 @@ func FromKeyValuePairs[Key any, Value any](cmp comparator.Comparator[Key], kvPai
 		},
 		kvPairs...,
 	))
+}
+
+func ToGoMap[Key comparable, Value any](m *Map[Key, Value]) map[Key]Value {
+	goMap := make(map[Key]Value, m.Count())
+	for _, kvPair := range m.KeyValuePairs() {
+		goMap[kvPair.Key] = kvPair.Value
+	}
+	return goMap
 }
 
 func (m *Map[Key, Value]) Count() int {
