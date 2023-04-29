@@ -66,7 +66,7 @@ func TestSetDelete(t *testing.T) {
 			values[i], values[j] = values[j], values[i]
 		})
 
-		s := NewSetFromValues(strings.Compare, values...)
+		s := FromValues(strings.Compare, values...)
 
 		r.Shuffle(len(values), func(i int, j int) {
 			values[i], values[j] = values[j], values[i]
