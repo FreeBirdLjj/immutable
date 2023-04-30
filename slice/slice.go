@@ -91,7 +91,7 @@ func (xs Slice[T]) Filter(predicate func(T) bool) Slice[T] {
 
 func (xs Slice[T]) Sort(cmp comparator.Comparator[T]) Slice[T] {
 
-	if len(xs) == 0 {
+	if len(xs) <= 1 {
 		return xs
 	}
 
