@@ -40,12 +40,19 @@ func Foldr[T1 any, T2 any](xs Slice[T1], init T2, f func(x T1, acc T2) T2) T2 {
 }
 
 func Concat[T any](xss Slice[Slice[T]]) Slice[T] {
-	cnt := Foldl(xss, 0, func(acc int, xs Slice[T]) int { return acc + len(xs) })
-	res := make(Slice[T], 0, cnt)
-	for _, xs := range xss {
-		res = append(res, xs...)
+	switch len(xss) {
+	case 0:
+		return nil
+	case 1:
+		return xss[0]
+	default:
+		cnt := Foldl(xss, 0, func(acc int, xs Slice[T]) int { return acc + len(xs) })
+		res := make(Slice[T], 0, cnt)
+		for _, xs := range xss {
+			res = append(res, xs...)
+		}
+		return res
 	}
-	return res
 }
 
 func (xs Slice[T]) Tail() Slice[T] {
@@ -91,13 +98,19 @@ func (xs Slice[T]) Filter(predicate func(T) bool) Slice[T] {
 
 func (xs Slice[T]) Sort(cmp comparator.Comparator[T]) Slice[T] {
 
-	if len(xs) <= 1 {
+	lessMaker := func(s Slice[T]) func(i int, j int) bool {
+		return func(i int, j int) bool {
+			return cmp(s[i], s[j]) < 0
+		}
+	}
+
+	if len(xs) <= 1 || sort.SliceIsSorted(xs, lessMaker(xs)) {
 		return xs
 	}
 
 	res := make(Slice[T], len(xs))
 	copy(res, xs)
-	sort.Slice(res, func(i, j int) bool { return cmp(res[i], res[j]) < 0 })
+	sort.Slice(res, lessMaker(res))
 	return res
 }
 
