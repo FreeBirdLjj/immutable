@@ -66,6 +66,42 @@ func (rbTree *RBTree[Value]) Lookup(value Value) *Value {
 	return rbTree.root.lookup(rbTree.cmp, value)
 }
 
+func (rbTree *RBTree[Value]) Maximum() *Value {
+
+	if rbTree.root == nil {
+		return nil
+	}
+
+	node := rbTree.root
+
+	for {
+		rightChild := node.children[directionRight]
+		if rightChild == nil {
+			value := node.value
+			return &value
+		}
+		node = rightChild
+	}
+}
+
+func (rbTree *RBTree[Value]) Minimum() *Value {
+
+	if rbTree.root == nil {
+		return nil
+	}
+
+	node := rbTree.root
+
+	for {
+		leftChild := node.children[directionLeft]
+		if leftChild == nil {
+			value := node.value
+			return &value
+		}
+		node = leftChild
+	}
+}
+
 func (rbTree *RBTree[Value]) Values() []Value {
 	values := []Value(nil)
 	rbTree.InorderTraversal(

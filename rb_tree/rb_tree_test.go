@@ -4,9 +4,13 @@ import (
 	"math/rand"
 	"strings"
 	"testing"
+	"testing/quick"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/freebirdljj/immutable/comparator"
 )
 
 func TestRBTreeInsert(t *testing.T) {
@@ -144,4 +148,67 @@ func TestRBTreeDelete(t *testing.T) {
 		assert.Len(t, newRBTree.Values(), len(values))
 		assert.Equal(t, len(values), newRBTree.Count())
 	})
+}
+
+func TestRBTreeMaximum(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"rb_tree.new().maximum() == nil": func() bool {
+			return New(comparator.OrderedComparator[int]).Maximum() == nil
+		},
+		"*rb_tree.fromValues(xs).maximum() == max(xs)": func(xs []int, lastX int) bool {
+
+			nonemptySlice := append(xs, lastX)
+
+			max := lastX
+			for _, x := range xs {
+				if max < x {
+					max = x
+				}
+			}
+
+			rbTree := FromValues(comparator.OrderedComparator[int], nonemptySlice...)
+			return *rbTree.Maximum() == max
+		},
+	})
+}
+
+func TestRBTreeMinimum(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"rb_tree.new().minimum() == nil": func() bool {
+			return New(comparator.OrderedComparator[int]).Minimum() == nil
+		},
+		"*rb_tree.fromValues(xs).minimum() == min(xs)": func(xs []int, lastX int) bool {
+
+			nonemptySlice := append(xs, lastX)
+
+			min := lastX
+			for _, x := range xs {
+				if min > x {
+					min = x
+				}
+			}
+
+			rbTree := FromValues(comparator.OrderedComparator[int], nonemptySlice...)
+			return *rbTree.Minimum() == min
+		},
+	})
+}
+
+func checkProperties(t *testing.T, properties map[string]any) {
+	for name, property := range properties {
+		name, property := name, property
+		t.Run(name, func(t *testing.T) {
+
+			t.Parallel()
+
+			err := quick.Check(property, nil)
+			require.NoError(t, err)
+		})
+	}
 }
