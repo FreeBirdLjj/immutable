@@ -39,6 +39,28 @@ func Foldr[T1 any, T2 any](xs Slice[T1], init T2, f func(x T1, acc T2) T2) T2 {
 	return res
 }
 
+// CAUTION: Only invoke `MaximumBy` with non-empty slice `xs`.
+func MaximumBy[T any](xs Slice[T], cmp comparator.Comparator[T]) T {
+	max := xs[0]
+	for _, x := range xs[1:] {
+		if cmp(max, x) < 0 {
+			max = x
+		}
+	}
+	return max
+}
+
+// CAUTION: Only invoke `MinimumBy` with non-empty slice `xs`.
+func MinimumBy[T any](xs Slice[T], cmp comparator.Comparator[T]) T {
+	min := xs[0]
+	for _, x := range xs[1:] {
+		if cmp(min, x) > 0 {
+			min = x
+		}
+	}
+	return min
+}
+
 func Concat[T any](xss Slice[Slice[T]]) Slice[T] {
 	switch len(xss) {
 	case 0:
