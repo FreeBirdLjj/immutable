@@ -56,6 +56,48 @@ func TestFoldr(t *testing.T) {
 	})
 }
 
+func TestMaximumBy(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"`maximumBy()` returns the max": func(xs []int, lastX int) bool {
+			nonemptySlice := append(xs, lastX)
+
+			max := lastX
+			for _, x := range xs {
+				if max < x {
+					max = x
+				}
+			}
+
+			xl := FromGoSlice(nonemptySlice)
+			return MaximumBy(xl, comparator.OrderedComparator[int]) == max
+		},
+	})
+}
+
+func TestMinimumBy(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"`mainimumBy()` returns the min": func(xs []int, lastX int) bool {
+			nonemptySlice := append(xs, lastX)
+
+			min := lastX
+			for _, x := range xs {
+				if min > x {
+					min = x
+				}
+			}
+
+			xl := FromGoSlice(nonemptySlice)
+			return MinimumBy(xl, comparator.OrderedComparator[int]) == min
+		},
+	})
+}
+
 func TestConcat(t *testing.T) {
 
 	t.Parallel()
