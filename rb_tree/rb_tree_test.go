@@ -155,10 +155,7 @@ func TestRBTreeMaximum(t *testing.T) {
 	t.Parallel()
 
 	checkProperties(t, map[string]any{
-		"rb_tree.new().maximum() == nil": func() bool {
-			return New(comparator.OrderedComparator[int]).Maximum() == nil
-		},
-		"*rb_tree.fromValues(xs).maximum() == max(xs)": func(xs []int, lastX int) bool {
+		"rb_tree.fromValues(xs).maximum() == max(xs)": func(xs []int, lastX int) bool {
 
 			nonemptySlice := append(xs, lastX)
 
@@ -170,7 +167,7 @@ func TestRBTreeMaximum(t *testing.T) {
 			}
 
 			rbTree := FromValues(comparator.OrderedComparator[int], nonemptySlice...)
-			return *rbTree.Maximum() == max
+			return rbTree.Maximum() == max
 		},
 	})
 }
@@ -180,10 +177,7 @@ func TestRBTreeMinimum(t *testing.T) {
 	t.Parallel()
 
 	checkProperties(t, map[string]any{
-		"rb_tree.new().minimum() == nil": func() bool {
-			return New(comparator.OrderedComparator[int]).Minimum() == nil
-		},
-		"*rb_tree.fromValues(xs).minimum() == min(xs)": func(xs []int, lastX int) bool {
+		"rb_tree.fromValues(xs).minimum() == min(xs)": func(xs []int, lastX int) bool {
 
 			nonemptySlice := append(xs, lastX)
 
@@ -195,7 +189,7 @@ func TestRBTreeMinimum(t *testing.T) {
 			}
 
 			rbTree := FromValues(comparator.OrderedComparator[int], nonemptySlice...)
-			return *rbTree.Minimum() == min
+			return rbTree.Minimum() == min
 		},
 	})
 }

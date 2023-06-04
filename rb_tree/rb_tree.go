@@ -66,37 +66,25 @@ func (rbTree *RBTree[Value]) Lookup(value Value) *Value {
 	return rbTree.root.lookup(rbTree.cmp, value)
 }
 
-func (rbTree *RBTree[Value]) Maximum() *Value {
-
-	if rbTree.root == nil {
-		return nil
-	}
-
+// CAUTION: Only invoke `Maximum` with non-empty RBTree.
+func (rbTree *RBTree[Value]) Maximum() Value {
 	node := rbTree.root
-
 	for {
 		rightChild := node.children[directionRight]
 		if rightChild == nil {
-			value := node.value
-			return &value
+			return node.value
 		}
 		node = rightChild
 	}
 }
 
-func (rbTree *RBTree[Value]) Minimum() *Value {
-
-	if rbTree.root == nil {
-		return nil
-	}
-
+// CAUTION: Only invoke `Minimum` with non-empty RBTree.
+func (rbTree *RBTree[Value]) Minimum() Value {
 	node := rbTree.root
-
 	for {
 		leftChild := node.children[directionLeft]
 		if leftChild == nil {
-			value := node.value
-			return &value
+			return node.value
 		}
 		node = leftChild
 	}
