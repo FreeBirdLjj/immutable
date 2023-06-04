@@ -133,6 +133,10 @@ func (xs *List[T]) Uncons() (value T, next *List[T]) {
 	return xs.value, xs.next
 }
 
+func (xs *List[T]) Empty() bool {
+	return xs == nil
+}
+
 // CAUTION: Only invoke `Length()` with finite list.
 func (xs *List[T]) Length() int {
 

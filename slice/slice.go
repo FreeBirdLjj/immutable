@@ -77,6 +77,10 @@ func Concat[T any](xss Slice[Slice[T]]) Slice[T] {
 	}
 }
 
+func (xs Slice[T]) Empty() bool {
+	return len(xs) == 0
+}
+
 func (xs Slice[T]) Tail() Slice[T] {
 	if len(xs) == 0 {
 		return nil
