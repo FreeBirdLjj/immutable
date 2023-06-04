@@ -48,6 +48,10 @@ func ToGoMap[Key comparable, Value any](m *Map[Key, Value]) map[Key]Value {
 	return goMap
 }
 
+func (m *Map[Key, Value]) Empty() bool {
+	return m.rbTree().Empty()
+}
+
 func (m *Map[Key, Value]) Count() int {
 	return m.rbTree().Count()
 }

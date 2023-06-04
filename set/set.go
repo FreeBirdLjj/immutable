@@ -22,6 +22,10 @@ func (s *Set[Value]) Values() []Value {
 	return s.rbTree().Values()
 }
 
+func (s *Set[Value]) Empty() bool {
+	return s.rbTree().Empty()
+}
+
 func (s *Set[Value]) Count() int {
 	return s.rbTree().Count()
 }

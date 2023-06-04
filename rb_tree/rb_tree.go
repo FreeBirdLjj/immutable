@@ -58,6 +58,10 @@ func FromValues[Value any](cmp comparator.Comparator[Value], values ...Value) *R
 	return rbTree
 }
 
+func (rbTree *RBTree[Value]) Empty() bool {
+	return rbTree.root == nil
+}
+
 func (rbTree *RBTree[Value]) Count() int {
 	return rbTree.cnt
 }
