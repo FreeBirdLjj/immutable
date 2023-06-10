@@ -11,6 +11,8 @@ type (
 		right  RightT
 		isLeft bool
 	}
+
+	// Never generate `Computation` value, only use the one passed in as argument `computation` via the callback function `f` of `Run()`.
 	Computation[LeftT any, RightT any] struct {
 		ch chan Either[LeftT, RightT]
 	}
@@ -68,6 +70,7 @@ func NewContextWithComputation[LeftT any, RightT any](ctx context.Context, compu
 	return context.WithValue(ctx, computationKey{}, computation)
 }
 
+// CAUTION: Do not invoke `Bind()` with `computation` from another thread.
 func Bind[LeftT any, RightT1 any, RightT2 any](computation *Computation[LeftT, RightT1], x Either[LeftT, RightT2]) RightT2 {
 	if x.IsLeft() {
 		computation.ch <- Left[RightT1](x.Left())
