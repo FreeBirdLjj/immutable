@@ -1,11 +1,27 @@
 package either
 
 import (
+	"context"
 	"testing"
 	"testing/quick"
 
 	"github.com/stretchr/testify/require"
 )
+
+func TestComputationInterconvertion(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"computation -> ctx -> computation": func() bool {
+			ctx := context.Background()
+			computation := new(Computation[error, int])
+			newCtx := NewContextWithComputation(ctx, computation)
+			gotComputation := ExtractComputationFromContext[error, int](newCtx)
+			return gotComputation == computation
+		},
+	})
+}
 
 func TestRun(t *testing.T) {
 
