@@ -79,6 +79,12 @@ func Bind[LeftT any, RightT1 any, RightT2 any](computation *Computation[LeftT, R
 	return x.Right()
 }
 
+// CAUTION: Do not invoke `BindContext()` with a `Context` that has not had any `Computation` put into it.
+func BindContext[RightT1 any, LeftT any, RightT2 any](ctx context.Context, x Either[LeftT, RightT2]) RightT2 {
+	computation := ExtractComputationFromContext[LeftT, RightT1](ctx)
+	return Bind(computation, x)
+}
+
 func Run[LeftT any, RightT any](f func(computation *Computation[LeftT, RightT]) RightT) Either[LeftT, RightT] {
 
 	computation := Computation[LeftT, RightT]{
@@ -92,4 +98,11 @@ func Run[LeftT any, RightT any](f func(computation *Computation[LeftT, RightT]) 
 
 	res := <-computation.ch
 	return res
+}
+
+func RunContext[LeftT any, RightT any](ctx context.Context, f func(context.Context) RightT) Either[LeftT, RightT] {
+	return Run[LeftT, RightT](func(computation *Computation[LeftT, RightT]) RightT {
+		newCtx := NewContextWithComputation(ctx, computation)
+		return f(newCtx)
+	})
 }
