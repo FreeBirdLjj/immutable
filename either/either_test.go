@@ -45,6 +45,28 @@ func TestRun(t *testing.T) {
 	})
 }
 
+func TestRunContext(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"`RunContext()` returns left if any `BindContext()` receives a left": func(left int, right string) bool {
+			res := RunContext[int](context.Background(), func(ctx context.Context) string {
+				x := BindContext[string](ctx, Left[string](left))
+				return x
+			})
+			return res.IsLeft() && res.Left() == left
+		},
+		"`RunContext()` returns left if all `BindContext()`s receive rights": func(left int, right string) bool {
+			res := RunContext[int](context.Background(), func(ctx context.Context) string {
+				x := BindContext[string](ctx, Right[int](right))
+				return x
+			})
+			return res.IsRight() && res.Right() == right
+		},
+	})
+}
+
 func checkProperties(t *testing.T, properties map[string]any) {
 	for name, property := range properties {
 		name, property := name, property
