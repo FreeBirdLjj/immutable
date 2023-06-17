@@ -106,3 +106,16 @@ func RunContext[LeftT any, RightT any](ctx context.Context, f func(context.Conte
 		return f(newCtx)
 	})
 }
+
+func PartitionEithers[LeftT any, RightT any](xs ...Either[LeftT, RightT]) ([]LeftT, []RightT) {
+	lefts := make([]LeftT, 0, len(xs)/2)
+	rights := make([]RightT, 0, len(xs)/2)
+	for _, x := range xs {
+		if x.IsLeft() {
+			lefts = append(lefts, x.Left())
+		} else {
+			rights = append(rights, x.Right())
+		}
+	}
+	return lefts, rights
+}
