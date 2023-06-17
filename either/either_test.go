@@ -2,6 +2,7 @@ package either
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"testing"
 	"testing/quick"
@@ -74,6 +75,7 @@ func TestPartitionEithers(t *testing.T) {
 
 	checkProperties(t, map[string]any{
 		"PartitionEithers(lefts.map(Left) ++ rights.map(Right)) == (lefts, rights)": func(lefts []int, rights []string) bool {
+
 			eithers := make([]Either[int, string], 0, len(lefts)+len(rights))
 			for _, left := range lefts {
 				eithers = append(eithers, Left[string](left))
@@ -81,8 +83,38 @@ func TestPartitionEithers(t *testing.T) {
 			for _, right := range rights {
 				eithers = append(eithers, Right[int](right))
 			}
+
 			gotLefts, gotRights := PartitionEithers(eithers...)
 			return slicesEqual(gotLefts, lefts) && slicesEqual(gotRights, rights)
+		},
+	})
+}
+
+func TestJoinResults(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"JoinResults(rights.map(Right)) == Right(rights)": func(rights []int) bool {
+			results := make([]Either[error, int], len(rights))
+			for i, right := range rights {
+				results[i] = Right[error](right)
+			}
+			gotAccumulation := JoinResults(results...)
+			return gotAccumulation.IsRight() && slicesEqual(gotAccumulation.Right(), rights)
+		},
+		"JoinResults(rights.map(Right).append(err.map(Left))) is Left": func(rights []int) bool {
+
+			err := errors.New("error1")
+
+			results := make([]Either[error, int], len(rights)+1)
+			for i, right := range rights {
+				results[i] = Right[error](right)
+			}
+			results[len(rights)] = Left[int](err)
+
+			gotAccumulation := JoinResults(results...)
+			return gotAccumulation.IsLeft() && errors.Is(gotAccumulation.Left(), err)
 		},
 	})
 }
