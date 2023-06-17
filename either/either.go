@@ -2,6 +2,7 @@ package either
 
 import (
 	"context"
+	"errors"
 	"runtime"
 )
 
@@ -118,4 +119,12 @@ func PartitionEithers[LeftT any, RightT any](xs ...Either[LeftT, RightT]) ([]Lef
 		}
 	}
 	return lefts, rights
+}
+
+func JoinResults[RightT any](xs ...Either[error, RightT]) Either[error, []RightT] {
+	lefts, rights := PartitionEithers(xs...)
+	if len(lefts) == 0 {
+		return Right[error](rights)
+	}
+	return Left[[]RightT](errors.Join(lefts...))
 }
