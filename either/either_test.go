@@ -2,6 +2,7 @@ package either
 
 import (
 	"context"
+	"reflect"
 	"testing"
 	"testing/quick"
 
@@ -67,6 +68,25 @@ func TestRunContext(t *testing.T) {
 	})
 }
 
+func TestPartitionEithers(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"PartitionEithers(lefts.map(Left) ++ rights.map(Right)) == (lefts, rights)": func(lefts []int, rights []string) bool {
+			eithers := make([]Either[int, string], 0, len(lefts)+len(rights))
+			for _, left := range lefts {
+				eithers = append(eithers, Left[string](left))
+			}
+			for _, right := range rights {
+				eithers = append(eithers, Right[int](right))
+			}
+			gotLefts, gotRights := PartitionEithers(eithers...)
+			return slicesEqual(gotLefts, lefts) && slicesEqual(gotRights, rights)
+		},
+	})
+}
+
 func checkProperties(t *testing.T, properties map[string]any) {
 	for name, property := range properties {
 		name, property := name, property
@@ -78,4 +98,8 @@ func checkProperties(t *testing.T, properties map[string]any) {
 			require.NoError(t, err)
 		})
 	}
+}
+
+func slicesEqual[T any](v1 []T, v2 []T) bool {
+	return (len(v1) == 0 && len(v2) == 0) || reflect.DeepEqual(v1, v2)
 }
