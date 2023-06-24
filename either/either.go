@@ -62,6 +62,34 @@ func (either *Either[_, RightT]) Right() RightT {
 	return either.right
 }
 
+func (either *Either[LeftT, RightT]) ToLeft(rightToLeft func(RightT) LeftT) LeftT {
+	if either.IsLeft() {
+		return either.Left()
+	}
+	return rightToLeft(either.Right())
+}
+
+func (either *Either[LeftT, RightT]) ToRight(leftToRight func(LeftT) RightT) RightT {
+	if either.IsRight() {
+		return either.Right()
+	}
+	return leftToRight(either.Left())
+}
+
+func (either *Either[LeftT, RightT]) OrLeft(left LeftT) LeftT {
+	if either.IsLeft() {
+		return either.Left()
+	}
+	return left
+}
+
+func (either *Either[LeftT, RightT]) OrRight(right RightT) RightT {
+	if either.IsRight() {
+		return either.Right()
+	}
+	return right
+}
+
 // CAUTION: Do not extract from a `Context` that has not had any `Computation` put into it.
 func ExtractComputationFromContext[LeftT any, RightT any](ctx context.Context) *Computation[LeftT, RightT] {
 	return ctx.Value(computationKey{}).(*Computation[LeftT, RightT])

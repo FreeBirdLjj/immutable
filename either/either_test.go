@@ -8,7 +8,73 @@ import (
 	"testing/quick"
 
 	"github.com/stretchr/testify/require"
+
+	immutable_func "github.com/freebirdljj/immutable/func"
 )
+
+func TestEitherToLeft(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"Left(x).ToLeft(Konst(y)) == ": func(x string, y string) bool {
+			either := Left[int](x)
+			return either.ToLeft(immutable_func.Konst[int](y)) == x
+		},
+		"Right(x).ToLeft(Konst(y)) == y": func(x int, y string) bool {
+			either := Right[string](x)
+			return either.ToLeft(immutable_func.Konst[int](y)) == y
+		},
+	})
+}
+
+func TestEitherToRight(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"Right(x).ToRight(Konst(y)) == x": func(x int, y int) bool {
+			either := Right[string](x)
+			return either.ToRight(immutable_func.Konst[string](y)) == x
+		},
+		"Left(x).ToRight(Konst(y)) == y": func(x string, y int) bool {
+			either := Left[int](x)
+			return either.ToRight(immutable_func.Konst[string](y)) == y
+		},
+	})
+}
+
+func TestEitherOrLeft(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"Left(x).OrLeft(y) == x": func(x string, y string) bool {
+			either := Left[int](x)
+			return either.OrLeft(y) == x
+		},
+		"Right(x).OrLeft(y) == y": func(x int, y string) bool {
+			either := Right[string](x)
+			return either.OrLeft(y) == y
+		},
+	})
+}
+
+func TestEitherOrRight(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"Right(x).OrRight(y) == x": func(x int, y int) bool {
+			either := Right[string](x)
+			return either.OrRight(y) == x
+		},
+		"Left(x).OrRight(y) == y": func(x string, y int) bool {
+			either := Left[int](x)
+			return either.OrRight(y) == y
+		},
+	})
+}
 
 func TestComputationInterconvertion(t *testing.T) {
 
