@@ -42,7 +42,7 @@ func safeDiv(a int, b int) either.Either[error, int] {
 }
 
 func f(s string) either.Either[error, int] {
-	return either.Run(func(computation *either.Computation[error, int]) int {
+	return either.Run(func(computation *either.Computation[error]) int {
 		var x int = either.Bind(computation, safeAtoi(s))
 		var root float64 = either.Bind(computation, safeSqrt(float64(x)))
 		var res int = either.Bind(computation, safeDiv(1, int(root)))
@@ -84,17 +84,17 @@ func doSomeIO(ctx context.Context, url string) either.Either[error, string] {
 		client := http.Client{
 			Timeout: 10 * time.Second,
 		}
-		req := either.BindContext[string](ctx, safeHTTPNewRequestWithContext(ctx, http.MethodGet, url, nil))
+		req := either.BindContext(ctx, safeHTTPNewRequestWithContext(ctx, http.MethodGet, url, nil))
 
-		resp := either.BindContext[string](ctx, safeHTTPClientDo(&client, req))
+		resp := either.BindContext(ctx, safeHTTPClientDo(&client, req))
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
 			err := fmt.Errorf("got http response status %d", resp.StatusCode)
-			either.BindContext[string](ctx, either.Left[string](err))
+			either.BindContext(ctx, either.Left[string](err))
 		}
 
-		body := either.BindContext[string](ctx, safeReadAll(resp.Body))
+		body := either.BindContext(ctx, safeReadAll(resp.Body))
 		return string(body)
 	})
 }
