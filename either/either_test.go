@@ -83,9 +83,9 @@ func TestComputationInterconvertion(t *testing.T) {
 	checkProperties(t, map[string]any{
 		"computation -> ctx -> computation": func() bool {
 			ctx := context.Background()
-			computation := new(Computation[error, int])
+			computation := new(Computation[error])
 			newCtx := NewContextWithComputation(ctx, computation)
-			gotComputation := ExtractComputationFromContext[error, int](newCtx)
+			gotComputation := ExtractComputationFromContext[error](newCtx)
 			return gotComputation == computation
 		},
 	})
@@ -96,15 +96,15 @@ func TestRun(t *testing.T) {
 	t.Parallel()
 
 	checkProperties(t, map[string]any{
-		"`run()` returns left if any `bind()` receives a left": func(left int, right string) bool {
-			res := Run(func(computation *Computation[int, string]) string {
+		"`Run()` returns left if any `Bind()` receives a left": func(left int, right string) bool {
+			res := Run(func(computation *Computation[int]) string {
 				x := Bind(computation, Left[string](left))
 				return x
 			})
 			return res.IsLeft() && res.Left() == left
 		},
-		"`run()` returns left if all `bind()`s receive rights": func(left int, right string) bool {
-			res := Run(func(computation *Computation[int, string]) string {
+		"`Run()` returns left if all `Bind()`s receive rights": func(left int, right string) bool {
+			res := Run(func(computation *Computation[int]) string {
 				x := Bind(computation, Right[int](right))
 				return x
 			})
@@ -120,14 +120,14 @@ func TestRunContext(t *testing.T) {
 	checkProperties(t, map[string]any{
 		"`RunContext()` returns left if any `BindContext()` receives a left": func(left int, right string) bool {
 			res := RunContext[int](context.Background(), func(ctx context.Context) string {
-				BindContext[string](ctx, Left[string](left))
+				BindContext(ctx, Left[string](left))
 				return right
 			})
 			return res.IsLeft() && res.Left() == left
 		},
 		"`RunContext()` returns right if all `BindContext()`s receive rights": func(right1 string, right2 string) bool {
 			res := RunContext[int](context.Background(), func(ctx context.Context) string {
-				BindContext[string](ctx, Right[int](right1))
+				BindContext(ctx, Right[int](right1))
 				return right2
 			})
 			return res.IsRight() && res.Right() == right2
@@ -142,14 +142,14 @@ func TestRunPossibleContext(t *testing.T) {
 	checkProperties(t, map[string]any{
 		"`RunPossibleContext()` with `ctx` without `Computation` returns left if any `BindContext()` receives a left": func(left int, right string) bool {
 			res := RunPossibleContext[int](context.Background(), func(ctx context.Context) string {
-				BindContext[string](ctx, Left[string](left))
+				BindContext(ctx, Left[string](left))
 				return right
 			})
 			return res.IsLeft() && res.Left() == left
 		},
 		"`RunPossibleContext()` with `ctx` without `Computation` returns right if all `BindContext()`s receive rights": func(right1 string, right2 string) bool {
 			res := RunContext[int](context.Background(), func(ctx context.Context) string {
-				BindContext[string](ctx, Right[int](right1))
+				BindContext(ctx, Right[int](right1))
 				return right2
 			})
 			return res.IsRight() && res.Right() == right2
@@ -157,7 +157,7 @@ func TestRunPossibleContext(t *testing.T) {
 		"`RunPossibleContext()` with `ctx` with `Computation` returns left if any `BindContext()` receives a left": func(left int, right string) bool {
 			res := RunContext[int](context.Background(), func(ctx context.Context) string {
 				RunPossibleContext[int](ctx, func(newCtx context.Context) string {
-					BindContext[string](newCtx, Left[string](left))
+					BindContext(newCtx, Left[string](left))
 					return right
 				})
 				return right
@@ -167,7 +167,7 @@ func TestRunPossibleContext(t *testing.T) {
 		"`RunPossibleContext()` with `ctx` with `Computation` returns right if all `BindContext()`s receive rights": func(right1 string, right2 string, right3 string) bool {
 			res := RunContext[int](context.Background(), func(ctx context.Context) string {
 				RunPossibleContext[int](ctx, func(newCtx context.Context) string {
-					BindContext[string](newCtx, Right[int](right1))
+					BindContext(newCtx, Right[int](right1))
 					return right2
 				})
 				return right3

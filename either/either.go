@@ -14,8 +14,8 @@ type (
 	}
 
 	// Never generate `Computation` value, only use the one passed in as argument `computation` via the callback function `f` of `Run()`.
-	Computation[LeftT any, RightT any] struct {
-		ch chan Either[LeftT, RightT]
+	Computation[LeftT any] struct {
+		returnLeft func(LeftT)
 	}
 
 	computationKey struct{}
@@ -91,46 +91,52 @@ func (either *Either[LeftT, RightT]) OrRight(right RightT) RightT {
 }
 
 // CAUTION: Do not extract from a `Context` that has not had any `Computation` put into it.
-func ExtractComputationFromContext[LeftT any, RightT any](ctx context.Context) *Computation[LeftT, RightT] {
-	return ctx.Value(computationKey{}).(*Computation[LeftT, RightT])
+func ExtractComputationFromContext[LeftT any](ctx context.Context) *Computation[LeftT] {
+	return ctx.Value(computationKey{}).(*Computation[LeftT])
 }
 
-func NewContextWithComputation[LeftT any, RightT any](ctx context.Context, computation *Computation[LeftT, RightT]) context.Context {
+func NewContextWithComputation[LeftT any](ctx context.Context, computation *Computation[LeftT]) context.Context {
 	return context.WithValue(ctx, computationKey{}, computation)
 }
 
 // CAUTION: Do not invoke `Bind()` with `computation` from another thread.
-func Bind[LeftT any, RightT1 any, RightT2 any](computation *Computation[LeftT, RightT1], x Either[LeftT, RightT2]) RightT2 {
+func Bind[LeftT any, RightT any](computation *Computation[LeftT], x Either[LeftT, RightT]) RightT {
 	if x.IsLeft() {
-		computation.ch <- Left[RightT1](x.Left())
-		runtime.Goexit()
+		computation.returnLeft(x.Left())
 	}
 	return x.Right()
 }
 
 // CAUTION: Do not invoke `BindContext()` with a `Context` that has not had any `Computation` put into it.
-func BindContext[RightT1 any, LeftT any, RightT2 any](ctx context.Context, x Either[LeftT, RightT2]) RightT2 {
-	computation := ExtractComputationFromContext[LeftT, RightT1](ctx)
+func BindContext[LeftT any, RightT any](ctx context.Context, x Either[LeftT, RightT]) RightT {
+	computation := ExtractComputationFromContext[LeftT](ctx)
 	return Bind(computation, x)
 }
 
-func Run[LeftT any, RightT any](f func(computation *Computation[LeftT, RightT]) RightT) Either[LeftT, RightT] {
+func Run[LeftT any, RightT any](f func(computation *Computation[LeftT]) RightT) Either[LeftT, RightT] {
 
-	computation := Computation[LeftT, RightT]{
-		ch: make(chan Either[LeftT, RightT], 1),
-	}
+	ch := make(chan struct{}, 1)
+	res := Either[LeftT, RightT]{}
 
 	go func() {
+		computation := Computation[LeftT]{
+			returnLeft: func(left LeftT) {
+				res = Left[RightT](left)
+				ch <- struct{}{}
+				runtime.Goexit()
+			},
+		}
 		right := f(&computation)
-		computation.ch <- Right[LeftT](right)
+		res = Right[LeftT](right)
+		ch <- struct{}{}
 	}()
 
-	res := <-computation.ch
+	<-ch
 	return res
 }
 
 func RunContext[LeftT any, RightT any](ctx context.Context, f func(context.Context) RightT) Either[LeftT, RightT] {
-	return Run[LeftT, RightT](func(computation *Computation[LeftT, RightT]) RightT {
+	return Run[LeftT, RightT](func(computation *Computation[LeftT]) RightT {
 		newCtx := NewContextWithComputation(ctx, computation)
 		return f(newCtx)
 	})
