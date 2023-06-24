@@ -136,6 +136,16 @@ func RunContext[LeftT any, RightT any](ctx context.Context, f func(context.Conte
 	})
 }
 
+// Inject a `Computation` into `ctx` if it doesn't have one (but doesn't check if the specific type parameters match).
+// Otherwise invoke `f()` directly with the given `ctx`.
+func RunPossibleContext[LeftT any, RightT any](ctx context.Context, f func(context.Context) RightT) Either[LeftT, RightT] {
+	if ctx.Value(computationKey{}) == nil {
+		return RunContext[LeftT](ctx, f)
+	}
+	right := f(ctx)
+	return Right[LeftT](right)
+}
+
 func PartitionEithers[LeftT any, RightT any](xs ...Either[LeftT, RightT]) ([]LeftT, []RightT) {
 	lefts := make([]LeftT, 0, len(xs)/2)
 	rights := make([]RightT, 0, len(xs)/2)

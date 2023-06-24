@@ -120,17 +120,59 @@ func TestRunContext(t *testing.T) {
 	checkProperties(t, map[string]any{
 		"`RunContext()` returns left if any `BindContext()` receives a left": func(left int, right string) bool {
 			res := RunContext[int](context.Background(), func(ctx context.Context) string {
-				x := BindContext[string](ctx, Left[string](left))
-				return x
+				BindContext[string](ctx, Left[string](left))
+				return right
 			})
 			return res.IsLeft() && res.Left() == left
 		},
-		"`RunContext()` returns left if all `BindContext()`s receive rights": func(left int, right string) bool {
+		"`RunContext()` returns right if all `BindContext()`s receive rights": func(right1 string, right2 string) bool {
 			res := RunContext[int](context.Background(), func(ctx context.Context) string {
-				x := BindContext[string](ctx, Right[int](right))
-				return x
+				BindContext[string](ctx, Right[int](right1))
+				return right2
 			})
-			return res.IsRight() && res.Right() == right
+			return res.IsRight() && res.Right() == right2
+		},
+	})
+}
+
+func TestRunPossibleContext(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"`RunPossibleContext()` with `ctx` without `Computation` returns left if any `BindContext()` receives a left": func(left int, right string) bool {
+			res := RunPossibleContext[int](context.Background(), func(ctx context.Context) string {
+				BindContext[string](ctx, Left[string](left))
+				return right
+			})
+			return res.IsLeft() && res.Left() == left
+		},
+		"`RunPossibleContext()` with `ctx` without `Computation` returns right if all `BindContext()`s receive rights": func(right1 string, right2 string) bool {
+			res := RunContext[int](context.Background(), func(ctx context.Context) string {
+				BindContext[string](ctx, Right[int](right1))
+				return right2
+			})
+			return res.IsRight() && res.Right() == right2
+		},
+		"`RunPossibleContext()` with `ctx` with `Computation` returns left if any `BindContext()` receives a left": func(left int, right string) bool {
+			res := RunContext[int](context.Background(), func(ctx context.Context) string {
+				RunPossibleContext[int](ctx, func(newCtx context.Context) string {
+					BindContext[string](newCtx, Left[string](left))
+					return right
+				})
+				return right
+			})
+			return res.IsLeft() && res.Left() == left
+		},
+		"`RunPossibleContext()` with `ctx` with `Computation` returns right if all `BindContext()`s receive rights": func(right1 string, right2 string, right3 string) bool {
+			res := RunContext[int](context.Background(), func(ctx context.Context) string {
+				RunPossibleContext[int](ctx, func(newCtx context.Context) string {
+					BindContext[string](newCtx, Right[int](right1))
+					return right2
+				})
+				return right3
+			})
+			return res.IsRight() && res.Right() == right3
 		},
 	})
 }
