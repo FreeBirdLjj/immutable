@@ -112,6 +112,15 @@ func (xs Slice[T]) Drop(n int) Slice[T] {
 	return xs[n:]
 }
 
+func (xs Slice[T]) Find(predicate func(T) bool) *T {
+	for i, x := range xs {
+		if predicate(x) {
+			return &xs[i]
+		}
+	}
+	return nil
+}
+
 func (xs Slice[T]) Filter(predicate func(T) bool) Slice[T] {
 	res := make(Slice[T], 0, len(xs))
 	for _, x := range xs {
