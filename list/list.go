@@ -183,6 +183,22 @@ func (xs *List[T]) Drop(n int) *List[T] {
 	return p
 }
 
+func (xs *List[T]) Find(predicate func(T) bool) *T {
+	visited := make(map[*List[T]]bool)
+	for p := xs; p != nil; p = p.next {
+
+		if visited[p] {
+			return nil
+		}
+		visited[p] = true
+
+		if predicate(p.value) {
+			return &p.value
+		}
+	}
+	return nil
+}
+
 func (xs *List[T]) Filter(predicate func(T) bool) *List[T] {
 	return maplist(xs, func(p *List[T]) *List[T] {
 		if p == nil || !predicate(p.value) {

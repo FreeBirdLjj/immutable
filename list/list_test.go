@@ -169,6 +169,31 @@ func TestListDrop(t *testing.T) {
 	})
 }
 
+func TestListFind(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"xs.find(konst(false)) == nil": func(xs []int) bool {
+			predicate := immutable_func.Konst[int](false)
+			xl := FromGoSlice(xs)
+			return xl.Find(predicate) == nil
+		},
+		"p(x) == true -> *([x].append(xs).find(p) == x": func(x int, xs []int) bool {
+			predicate := func(val int) bool { return val == x }
+			xl := FromGoSlice([]int{x}).Append(FromGoSlice(xs))
+			return reflect.DeepEqual(xl.Find(predicate), &x)
+		},
+		"p(x) == false -> [x].append(xs).find(p) == xs.find(p)": func(x int, xs []int) bool {
+			predicate := func(val int) bool { return val%2 != x%2 }
+			return reflect.DeepEqual(
+				FromGoSlice([]int{x}).Append(FromGoSlice(xs)).Find(predicate),
+				FromGoSlice(xs).Find(predicate),
+			)
+		},
+	})
+}
+
 func TestListFilter(t *testing.T) {
 
 	t.Parallel()
