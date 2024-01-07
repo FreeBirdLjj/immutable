@@ -155,15 +155,15 @@ func TestSliceFind(t *testing.T) {
 	t.Parallel()
 
 	checkProperties(t, map[string]any{
-		"xs.find(konst(false)) == nil": func(xs []int) bool {
+		"xs.find(konst(false)) == nothing": func(xs []int) bool {
 			predicate := immutable_func.Konst[int](false)
 			xl := FromGoSlice(xs)
-			return xl.Find(predicate) == nil
+			return xl.Find(predicate).IsNothing()
 		},
-		"p(x) == true -> *([x].append(xs).find(p) == x": func(x int, xs []int) bool {
+		"p(x) == true -> [x].append(xs).find(p) == Just(x)": func(x int, xs []int) bool {
 			predicate := func(val int) bool { return val == x }
 			xl := FromGoSlice([]int{x}).Append(xs...)
-			return reflect.DeepEqual(xl.Find(predicate), &x)
+			return xl.Find(predicate).Value() == x
 		},
 		"p(x) == false -> [x].append(xs).find(p) == xs.find(p)": func(x int, xs []int) bool {
 			predicate := func(val int) bool { return val%2 != x%2 }

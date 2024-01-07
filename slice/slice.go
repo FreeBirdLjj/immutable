@@ -4,6 +4,7 @@ import (
 	"sort"
 
 	"github.com/freebirdljj/immutable/comparator"
+	"github.com/freebirdljj/immutable/maybe"
 )
 
 type (
@@ -112,13 +113,13 @@ func (xs Slice[T]) Drop(n int) Slice[T] {
 	return xs[n:]
 }
 
-func (xs Slice[T]) Find(predicate func(T) bool) *T {
+func (xs Slice[T]) Find(predicate func(T) bool) maybe.Maybe[T] {
 	for i, x := range xs {
 		if predicate(x) {
-			return &xs[i]
+			return maybe.FromGoPointer(&xs[i])
 		}
 	}
-	return nil
+	return maybe.Nothing[T]()
 }
 
 func (xs Slice[T]) Filter(predicate func(T) bool) Slice[T] {
