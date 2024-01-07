@@ -3,6 +3,7 @@ package list
 import (
 	"github.com/freebirdljj/immutable/comparator"
 	immutable_func "github.com/freebirdljj/immutable/func"
+	"github.com/freebirdljj/immutable/maybe"
 )
 
 type (
@@ -183,20 +184,15 @@ func (xs *List[T]) Drop(n int) *List[T] {
 	return p
 }
 
-func (xs *List[T]) Find(predicate func(T) bool) *T {
+func (xs *List[T]) Find(predicate func(T) bool) maybe.Maybe[T] {
 	visited := make(map[*List[T]]bool)
-	for p := xs; p != nil; p = p.next {
-
-		if visited[p] {
-			return nil
-		}
+	for p := xs; p != nil && !visited[p]; p = p.next {
 		visited[p] = true
-
 		if predicate(p.value) {
-			return &p.value
+			return maybe.FromGoPointer(&p.value)
 		}
 	}
-	return nil
+	return maybe.Nothing[T]()
 }
 
 func (xs *List[T]) Filter(predicate func(T) bool) *List[T] {
