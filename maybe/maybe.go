@@ -33,6 +33,10 @@ func (m Maybe[T]) IsNothing() bool {
 	return m.value == nil
 }
 
+func (m Maybe[T]) ToGoPointer() *T {
+	return m.value
+}
+
 func (m Maybe[T]) Value() T {
 	return *m.value
 }

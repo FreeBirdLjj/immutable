@@ -29,6 +29,23 @@ func TestMaybeIsNothing(t *testing.T) {
 	})
 }
 
+func TestMaybeToGoPointer(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"*(Just(x).ToGoPointer()) === x": func(x int) bool {
+			return *Just(x).ToGoPointer() == x
+		},
+		"Nothing().ToGoPointer() === nil": func() bool {
+			return Nothing[int]().ToGoPointer() == nil
+		},
+		"FromGoPointer(ptr).ToGoPointer() === ptr": func(ptr *int) bool {
+			return FromGoPointer(ptr).ToGoPointer() == ptr
+		},
+	})
+}
+
 func TestMaybeOrValue(t *testing.T) {
 
 	t.Parallel()
