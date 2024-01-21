@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math"
 	"net/http"
 	"net/http/httptest"
@@ -75,7 +74,7 @@ func safeHTTPClientDo(client *http.Client, req *http.Request) either.Either[erro
 }
 
 func safeReadAll(reader io.Reader) either.Either[error, []byte] {
-	return either.FromGoResult(ioutil.ReadAll(reader))
+	return either.FromGoResult(io.ReadAll(reader))
 }
 
 func doSomeIO(ctx context.Context, url string) either.Either[error, string] {
