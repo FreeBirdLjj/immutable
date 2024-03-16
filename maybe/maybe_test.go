@@ -1,11 +1,34 @@
 package maybe
 
 import (
+	"reflect"
 	"testing"
 	"testing/quick"
 
 	"github.com/stretchr/testify/require"
+
+	immutable_func "github.com/freebirdljj/immutable/func"
 )
+
+func TestBind(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"Bind(Nothing(), f) === Nothing()": func() bool {
+			return Bind(Nothing[int](), immutable_func.Konst[int](Just(""))).IsNothing()
+		},
+		"Bind(Just(x), f) == Nothing() if f(x) == Nothing()": func(x int) bool {
+			return Bind(Just(x), immutable_func.Konst[int](Nothing[string]())).IsNothing()
+		},
+		"Bind(Just(x), f) == f(x) if f(x) returns a `Just`": func(x int, y string) bool {
+			return reflect.DeepEqual(
+				Bind(Just(x), immutable_func.Konst[int](Just(y))),
+				Just(y),
+			)
+		},
+	})
+}
 
 func TestMaybeIsJust(t *testing.T) {
 
