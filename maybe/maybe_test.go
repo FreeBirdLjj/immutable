@@ -30,6 +30,23 @@ func TestBind(t *testing.T) {
 	})
 }
 
+func TestMap(t *testing.T) {
+
+	t.Parallel()
+
+	checkProperties(t, map[string]any{
+		"Map(Nothing(), f) === Nothing()": func() bool {
+			return Map(Nothing[int](), immutable_func.Konst[int]("")).IsNothing()
+		},
+		"Map(Just(x), f) === Just(f(x))": func(x int, y string) bool {
+			return reflect.DeepEqual(
+				Map(Just(x), immutable_func.Konst[int](y)),
+				Just(y),
+			)
+		},
+	})
+}
+
 func TestMaybeIsJust(t *testing.T) {
 
 	t.Parallel()

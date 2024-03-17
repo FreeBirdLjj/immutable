@@ -32,6 +32,14 @@ func Bind[T1 any, T2 any](m Maybe[T1], f func(T1) Maybe[T2]) Maybe[T2] {
 	return f(m.Value())
 }
 
+func Map[T1 any, T2 any](m Maybe[T1], f func(T1) T2) Maybe[T2] {
+	return Bind(m,
+		func(v T1) Maybe[T2] {
+			return Just(f(v))
+		},
+	)
+}
+
 func (m Maybe[T]) IsJust() bool {
 	return m.value != nil
 }
