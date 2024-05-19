@@ -3,18 +3,13 @@ package maybe
 import (
 	"reflect"
 	"testing"
-	"testing/quick"
-
-	"github.com/stretchr/testify/require"
 
 	immutable_func "github.com/freebirdljj/immutable/func"
+	"github.com/freebirdljj/immutable/internal/quick"
 )
 
 func TestBind(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"Bind(Nothing(), f) === Nothing()": func() bool {
 			return Bind(Nothing[int](), immutable_func.Konst[int](Just(""))).IsNothing()
 		},
@@ -31,10 +26,7 @@ func TestBind(t *testing.T) {
 }
 
 func TestMap(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"Map(Nothing(), f) === Nothing()": func() bool {
 			return Map(Nothing[int](), immutable_func.Konst[int]("")).IsNothing()
 		},
@@ -48,10 +40,7 @@ func TestMap(t *testing.T) {
 }
 
 func TestMaybeIsJust(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"Just(x).IsJust() === true": func(x int) bool {
 			return Just(x).IsJust()
 		},
@@ -59,10 +48,7 @@ func TestMaybeIsJust(t *testing.T) {
 }
 
 func TestMaybeIsNothing(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"Nothing().IsNothing() === true": func() bool {
 			return Nothing[int]().IsNothing()
 		},
@@ -70,10 +56,7 @@ func TestMaybeIsNothing(t *testing.T) {
 }
 
 func TestMaybeToGoPointer(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"*(Just(x).ToGoPointer()) === x": func(x int) bool {
 			return *Just(x).ToGoPointer() == x
 		},
@@ -87,10 +70,7 @@ func TestMaybeToGoPointer(t *testing.T) {
 }
 
 func TestMaybeOrValue(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"Just(x).OrValue(y) == x": func(x int, y int) bool {
 			return Just(x).OrValue(y) == x
 		},
@@ -98,17 +78,4 @@ func TestMaybeOrValue(t *testing.T) {
 			return Nothing[int]().OrValue(x) == x
 		},
 	})
-}
-
-func checkProperties(t *testing.T, properties map[string]any) {
-	for name, property := range properties {
-		name, property := name, property
-		t.Run(name, func(t *testing.T) {
-
-			t.Parallel()
-
-			err := quick.Check(property, nil)
-			require.NoError(t, err)
-		})
-	}
 }

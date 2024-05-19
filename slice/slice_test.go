@@ -5,19 +5,14 @@ import (
 	"sort"
 	"strconv"
 	"testing"
-	"testing/quick"
-
-	"github.com/stretchr/testify/require"
 
 	"github.com/freebirdljj/immutable/comparator"
 	immutable_func "github.com/freebirdljj/immutable/func"
+	"github.com/freebirdljj/immutable/internal/quick"
 )
 
 func TestMap(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.map(f).length() == len(xs)": func(xs []int) bool {
 			f := func(x int) int { return x + 1 }
 			l := FromGoSlice(xs)
@@ -33,10 +28,7 @@ func TestMap(t *testing.T) {
 }
 
 func TestFoldl(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.foldl([], append) == xs": func(xs []int) bool {
 			xl := FromGoSlice(xs)
 			return slicesEqual(Foldl(xl, nil, func(acc Slice[int], x int) Slice[int] { return append(acc, x) }).ToGoSlice(), xs)
@@ -45,10 +37,7 @@ func TestFoldl(t *testing.T) {
 }
 
 func TestFoldr(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.foldr([], append).reverse() == xs": func(xs []int) bool {
 			xl := FromGoSlice(xs)
 			return slicesEqual(Foldr(xl, nil, func(x int, acc Slice[int]) Slice[int] { return append(acc, x) }).Reverse().ToGoSlice(), xs)
@@ -57,10 +46,7 @@ func TestFoldr(t *testing.T) {
 }
 
 func TestMaximumBy(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"`maximumBy()` returns the max": func(xs []int, lastX int) bool {
 			nonemptySlice := append(xs, lastX)
 
@@ -78,10 +64,7 @@ func TestMaximumBy(t *testing.T) {
 }
 
 func TestMinimumBy(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"`mainimumBy()` returns the min": func(xs []int, lastX int) bool {
 			nonemptySlice := append(xs, lastX)
 
@@ -99,10 +82,7 @@ func TestMinimumBy(t *testing.T) {
 }
 
 func TestConcat(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"concat([[]] * N) == []": func(n uint) bool {
 			n %= 100
 			return len(Concat(make(Slice[Slice[int]], n))) == 0
@@ -115,10 +95,7 @@ func TestConcat(t *testing.T) {
 }
 
 func TestSliceAppend(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.append(elems...) == append(xs, elems...)": func(xs []int, elems []int) bool {
 			xl := FromGoSlice(xs)
 			return slicesEqual(xl.Append(elems...).ToGoSlice(), append(xs, elems...))
@@ -127,10 +104,7 @@ func TestSliceAppend(t *testing.T) {
 }
 
 func TestSliceTake(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.append(ys).take(len(xs)) == xs": func(xs []int, ys []int) bool {
 			xl := FromGoSlice(xs)
 			return slicesEqual(xl.Append(ys...).Take(len(xs)).ToGoSlice(), xs)
@@ -139,10 +113,7 @@ func TestSliceTake(t *testing.T) {
 }
 
 func TestSliceDrop(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.append(ys).drop(xs.length()) == ys": func(xs []int, ys []int) bool {
 			xl := FromGoSlice(xs)
 			return slicesEqual(xl.Append(ys...).Drop(len(xs)).ToGoSlice(), ys)
@@ -151,10 +122,7 @@ func TestSliceDrop(t *testing.T) {
 }
 
 func TestSliceFind(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.find(konst(false)) == nothing": func(xs []int) bool {
 			predicate := immutable_func.Konst[int](false)
 			xl := FromGoSlice(xs)
@@ -176,10 +144,7 @@ func TestSliceFind(t *testing.T) {
 }
 
 func TestSliceFilter(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.filter(p).append(ys.filter(p)) == xs.append(ys).filter(p)": func(xs []int, ys []int) bool {
 			predicate := func(x int) bool { return x%2 == 0 }
 			xl := FromGoSlice(xs)
@@ -200,10 +165,7 @@ func TestSliceFilter(t *testing.T) {
 }
 
 func TestSliceSort(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"sort(xs) is sorted": func(xs []int) bool {
 
 			sortedXs := make([]int, len(xs))
@@ -217,10 +179,7 @@ func TestSliceSort(t *testing.T) {
 }
 
 func TestSliceReverse(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.reverse().length() == xs.length()": func(xs []int) bool {
 			xl := FromGoSlice(xs)
 			return len(xl.Reverse()) == len(xs)
@@ -237,10 +196,7 @@ func TestSliceReverse(t *testing.T) {
 }
 
 func TestSliceIntersperse(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"[].intersperse(sep) == []": func(sep int) bool {
 			return Slice[int](nil).Intersperse(sep) == nil
 		},
@@ -256,10 +212,7 @@ func TestSliceIntersperse(t *testing.T) {
 }
 
 func TestSliceAll(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.append(ys).all(p) == xs.all(p) and ys.all(p)": func(xs []int, ys []int) bool {
 			predicate := func(x int) bool { return x%100 < 90 }
 			xl := FromGoSlice(xs)
@@ -275,10 +228,7 @@ func TestSliceAll(t *testing.T) {
 }
 
 func TestSliceAny(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.append(ys).any(p) == xs.any(p) or ys.any(p)": func(xs []int, ys []int) bool {
 			predicate := func(x int) bool { return x%100 < 90 }
 			xl := FromGoSlice(xs)
@@ -291,19 +241,6 @@ func TestSliceAny(t *testing.T) {
 			return !xl.Any(predicate)
 		},
 	})
-}
-
-func checkProperties(t *testing.T, properties map[string]any) {
-	for name, property := range properties {
-		name, property := name, property
-		t.Run(name, func(t *testing.T) {
-
-			t.Parallel()
-
-			err := quick.Check(property, nil)
-			require.NoError(t, err)
-		})
-	}
 }
 
 func slicesEqual[T any](v1 []T, v2 []T) bool {
