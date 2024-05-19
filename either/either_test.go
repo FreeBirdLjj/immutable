@@ -5,18 +5,13 @@ import (
 	"errors"
 	"reflect"
 	"testing"
-	"testing/quick"
-
-	"github.com/stretchr/testify/require"
 
 	immutable_func "github.com/freebirdljj/immutable/func"
+	"github.com/freebirdljj/immutable/internal/quick"
 )
 
 func TestEitherToLeft(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"Left(x).ToLeft(Konst(y)) == ": func(x string, y string) bool {
 			either := Left[int](x)
 			return either.ToLeft(immutable_func.Konst[int](y)) == x
@@ -29,10 +24,7 @@ func TestEitherToLeft(t *testing.T) {
 }
 
 func TestEitherToRight(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"Right(x).ToRight(Konst(y)) == x": func(x int, y int) bool {
 			either := Right[string](x)
 			return either.ToRight(immutable_func.Konst[string](y)) == x
@@ -45,10 +37,7 @@ func TestEitherToRight(t *testing.T) {
 }
 
 func TestEitherOrLeft(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"Left(x).OrLeft(y) == x": func(x string, y string) bool {
 			either := Left[int](x)
 			return either.OrLeft(y) == x
@@ -61,10 +50,7 @@ func TestEitherOrLeft(t *testing.T) {
 }
 
 func TestEitherOrRight(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"Right(x).OrRight(y) == x": func(x int, y int) bool {
 			either := Right[string](x)
 			return either.OrRight(y) == x
@@ -77,10 +63,7 @@ func TestEitherOrRight(t *testing.T) {
 }
 
 func TestComputationInterconvertion(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"computation -> ctx -> computation": func() bool {
 			ctx := context.Background()
 			computation := new(Computation[error])
@@ -92,10 +75,7 @@ func TestComputationInterconvertion(t *testing.T) {
 }
 
 func TestRun(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"`Run()` returns left if any `Bind()` receives a left": func(left int, right string) bool {
 			res := Run(func(computation *Computation[int]) string {
 				x := Bind(computation, Left[string](left))
@@ -114,10 +94,7 @@ func TestRun(t *testing.T) {
 }
 
 func TestRunContext(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"`RunContext()` returns left if any `BindContext()` receives a left": func(left int, right string) bool {
 			res := RunContext[int](context.Background(), func(ctx context.Context) string {
 				BindContext(ctx, Left[string](left))
@@ -136,10 +113,7 @@ func TestRunContext(t *testing.T) {
 }
 
 func TestRunPossibleContext(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"`RunPossibleContext()` with `ctx` without `Computation` returns left if any `BindContext()` receives a left": func(left int, right string) bool {
 			res := RunPossibleContext[int](context.Background(), func(ctx context.Context) string {
 				BindContext(ctx, Left[string](left))
@@ -178,10 +152,7 @@ func TestRunPossibleContext(t *testing.T) {
 }
 
 func TestPartitionEithers(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"PartitionEithers(lefts.map(Left) ++ rights.map(Right)) == (lefts, rights)": func(lefts []int, rights []string) bool {
 
 			eithers := make([]Either[int, string], 0, len(lefts)+len(rights))
@@ -199,10 +170,7 @@ func TestPartitionEithers(t *testing.T) {
 }
 
 func TestJoinResults(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"JoinResults(rights.map(Right)) == Right(rights)": func(rights []int) bool {
 			results := make([]Either[error, int], len(rights))
 			for i, right := range rights {
@@ -225,19 +193,6 @@ func TestJoinResults(t *testing.T) {
 			return gotAccumulation.IsLeft() && errors.Is(gotAccumulation.Left(), err)
 		},
 	})
-}
-
-func checkProperties(t *testing.T, properties map[string]any) {
-	for name, property := range properties {
-		name, property := name, property
-		t.Run(name, func(t *testing.T) {
-
-			t.Parallel()
-
-			err := quick.Check(property, nil)
-			require.NoError(t, err)
-		})
-	}
 }
 
 func slicesEqual[T any](v1 []T, v2 []T) bool {

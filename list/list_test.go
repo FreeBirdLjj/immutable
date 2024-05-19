@@ -6,19 +6,14 @@ import (
 	"sort"
 	"strconv"
 	"testing"
-	"testing/quick"
-
-	"github.com/stretchr/testify/require"
 
 	"github.com/freebirdljj/immutable/comparator"
 	immutable_func "github.com/freebirdljj/immutable/func"
+	"github.com/freebirdljj/immutable/internal/quick"
 )
 
 func TestCycle(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"cycle(xs) is infinite": func(xs []int, last int) bool {
 			nonemptySlice := append(xs, last)
 			xl := FromGoSlice(nonemptySlice)
@@ -39,10 +34,7 @@ func TestCycle(t *testing.T) {
 }
 
 func TestMap(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.map(f).length() == xs.length()": func(xs []int) bool {
 			f := func(x int) int { return x + 1 }
 			l := FromGoSlice(xs)
@@ -65,10 +57,7 @@ func TestMap(t *testing.T) {
 }
 
 func TestFoldl(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.foldl([], flip(cons)).reverse() == xs": func(xs []int) bool {
 			xl := FromGoSlice(xs)
 			return slicesEqual(Foldl(xl, nil, func(acc *List[int], x int) *List[int] { return Cons(x, acc) }).Reverse().ToGoSlice(), xs)
@@ -77,10 +66,7 @@ func TestFoldl(t *testing.T) {
 }
 
 func TestFoldr(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.foldr([], cons) == xs": func(xs []int) bool {
 			xl := FromGoSlice(xs)
 			return slicesEqual(Foldr(xl, nil, Cons[int]).ToGoSlice(), xs)
@@ -89,10 +75,7 @@ func TestFoldr(t *testing.T) {
 }
 
 func TestConcat(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"concat([[]] * N) == []": func(n uint) bool {
 			n %= 100
 			return Concat(Repeat((*List[int])(nil))).Take(int(n)) == nil
@@ -115,10 +98,7 @@ func TestConcat(t *testing.T) {
 }
 
 func TestListAppend(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.append(ys) == xs ++ ys": func(xs []int, ys []int) bool {
 			xl := FromGoSlice(xs)
 			yl := FromGoSlice(ys)
@@ -134,10 +114,7 @@ func TestListAppend(t *testing.T) {
 }
 
 func TestListTake(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.append(ys).take(xs.length()) == xs": func(xs []int, ys []int) bool {
 			xl := FromGoSlice(xs)
 			yl := FromGoSlice(ys)
@@ -152,10 +129,7 @@ func TestListTake(t *testing.T) {
 }
 
 func TestListDrop(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.append(ys).drop(xs.length()) == ys": func(xs []int, ys []int) bool {
 			xl := FromGoSlice(xs)
 			yl := FromGoSlice(ys)
@@ -170,10 +144,7 @@ func TestListDrop(t *testing.T) {
 }
 
 func TestListFind(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.find(konst(false)) == Nothing": func(xs []int) bool {
 			predicate := immutable_func.Konst[int](false)
 			xl := FromGoSlice(xs)
@@ -195,10 +166,7 @@ func TestListFind(t *testing.T) {
 }
 
 func TestListFilter(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.filter(p).append(ys.filter(p)) == xs.append(ys).filter(p)": func(xs []int, ys []int) bool {
 			predicate := func(x int) bool { return x%2 == 0 }
 			xl := FromGoSlice(xs)
@@ -231,10 +199,7 @@ func TestListFilter(t *testing.T) {
 }
 
 func TestListSort(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"sort(xs) is sorted": func(xs []int) bool {
 
 			sortedXs := make([]int, len(xs))
@@ -264,10 +229,7 @@ func TestListSort(t *testing.T) {
 }
 
 func TestListReverse(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.reverse().length() == xs.length()": func(xs []int) bool {
 			xl := FromGoSlice(xs)
 			return xl.Reverse().Length() == len(xs)
@@ -284,10 +246,7 @@ func TestListReverse(t *testing.T) {
 }
 
 func TestListIntersperse(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"[].intersperse(sep) == []": func(sep int) bool {
 			return (*List[int])(nil).Intersperse(sep) == nil
 		},
@@ -318,10 +277,7 @@ func TestListIntersperse(t *testing.T) {
 }
 
 func TestListIsIsomorphicTo(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs is isomorphic to itself": func(xs []int) bool {
 			xl := FromGoSlice(xs)
 			return xl.IsIsomorphicTo(xl, comparator.OrderedComparator[int])
@@ -337,10 +293,7 @@ func TestListIsIsomorphicTo(t *testing.T) {
 }
 
 func TestListAll(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.append(ys).all(p) == xs.all(p) and ys.all(p)": func(xs []int, ys []int) bool {
 			predicate := func(x int) bool { return x%100 < 90 }
 			xl := FromGoSlice(xs)
@@ -361,10 +314,7 @@ func TestListAll(t *testing.T) {
 }
 
 func TestListAny(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"xs.append(ys).any(p) == xs.any(p) or ys.any(p)": func(xs []int, ys []int) bool {
 			predicate := func(x int) bool { return x%100 < 90 }
 			xl := FromGoSlice(xs)
@@ -382,19 +332,6 @@ func TestListAny(t *testing.T) {
 			return Repeat(x).Any(predicate) == predicate(x)
 		},
 	})
-}
-
-func checkProperties(t *testing.T, properties map[string]any) {
-	for name, property := range properties {
-		name, property := name, property
-		t.Run(name, func(t *testing.T) {
-
-			t.Parallel()
-
-			err := quick.Check(property, nil)
-			require.NoError(t, err)
-		})
-	}
 }
 
 func slicesEqual[T any](v1 []T, v2 []T) bool {

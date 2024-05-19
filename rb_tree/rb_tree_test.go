@@ -4,13 +4,12 @@ import (
 	"math/rand"
 	"strings"
 	"testing"
-	"testing/quick"
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 
 	"github.com/freebirdljj/immutable/comparator"
+	"github.com/freebirdljj/immutable/internal/quick"
 )
 
 func TestRBTreeInsert(t *testing.T) {
@@ -151,10 +150,7 @@ func TestRBTreeDelete(t *testing.T) {
 }
 
 func TestRBTreeMaximum(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"rb_tree.fromValues(xs).maximum() == max(xs)": func(xs []int, lastX int) bool {
 
 			nonemptySlice := append(xs, lastX)
@@ -173,10 +169,7 @@ func TestRBTreeMaximum(t *testing.T) {
 }
 
 func TestRBTreeMinimum(t *testing.T) {
-
-	t.Parallel()
-
-	checkProperties(t, map[string]any{
+	quick.CheckProperties(t, map[string]any{
 		"rb_tree.fromValues(xs).minimum() == min(xs)": func(xs []int, lastX int) bool {
 
 			nonemptySlice := append(xs, lastX)
@@ -192,17 +185,4 @@ func TestRBTreeMinimum(t *testing.T) {
 			return rbTree.Minimum() == min
 		},
 	})
-}
-
-func checkProperties(t *testing.T, properties map[string]any) {
-	for name, property := range properties {
-		name, property := name, property
-		t.Run(name, func(t *testing.T) {
-
-			t.Parallel()
-
-			err := quick.Check(property, nil)
-			require.NoError(t, err)
-		})
-	}
 }
