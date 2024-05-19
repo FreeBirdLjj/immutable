@@ -21,3 +21,9 @@ func OrderedComparator[T constraints.Ordered](l T, r T) int {
 		return 0
 	}
 }
+
+func CascadeComparator[T1 any, T2 any](cmp Comparator[T1], mapping func(T2) T1) Comparator[T2] {
+	return func(l T2, r T2) int {
+		return cmp(mapping(l), mapping(r))
+	}
+}
