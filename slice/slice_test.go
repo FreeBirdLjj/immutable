@@ -1,13 +1,12 @@
 package slice
 
 import (
+	"cmp"
 	"reflect"
 	"slices"
 	"sort"
 	"strconv"
 	"testing"
-
-	"golang.org/x/exp/constraints"
 
 	"github.com/freebirdljj/immutable/comparator"
 	immutable_func "github.com/freebirdljj/immutable/func"
@@ -302,7 +301,7 @@ func slicesEqual[T any](v1 []T, v2 []T) bool {
 	return (len(v1) == 0 && len(v2) == 0) || reflect.DeepEqual(v1, v2)
 }
 
-func slicesElementsMatch[T constraints.Ordered](xs []T, ys []T) bool {
+func slicesElementsMatch[T cmp.Ordered](xs []T, ys []T) bool {
 
 	sortedXs := make([]T, len(xs))
 	sortedYs := make([]T, len(ys))
