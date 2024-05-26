@@ -132,6 +132,22 @@ func (xs Slice[T]) Filter(predicate func(T) bool) Slice[T] {
 	return res
 }
 
+func (xs Slice[T]) Partition(predicate func(T) bool) (satisfied Slice[T], unsatisfied Slice[T]) {
+
+	satisfied = make(Slice[T], 0, len(xs))
+	unsatisfied = make(Slice[T], 0, len(xs))
+
+	for _, x := range xs {
+		if predicate(x) {
+			satisfied = append(satisfied, x)
+		} else {
+			unsatisfied = append(unsatisfied, x)
+		}
+	}
+
+	return satisfied, unsatisfied
+}
+
 func (xs Slice[T]) Sort(cmp comparator.Comparator[T]) Slice[T] {
 
 	lessMaker := func(s Slice[T]) func(i int, j int) bool {
