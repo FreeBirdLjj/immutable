@@ -62,6 +62,17 @@ func MinimumBy[T any](xs Slice[T], cmp comparator.Comparator[T]) T {
 	return min
 }
 
+func GroupBy[T any](xs Slice[T], cmp comparator.Comparator[T]) Slice[Slice[T]] {
+	res := Slice[Slice[T]](nil)
+	for len(xs) > 0 {
+		head := xs[0]
+		headEqs, rest := xs.Partition(func(x T) bool { return cmp(head, x) == 0 })
+		res = append(res, headEqs)
+		xs = rest
+	}
+	return res
+}
+
 func Concat[T any](xss Slice[Slice[T]]) Slice[T] {
 	switch len(xss) {
 	case 0:

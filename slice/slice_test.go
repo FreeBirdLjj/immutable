@@ -68,7 +68,7 @@ func TestMaximumBy(t *testing.T) {
 
 func TestMinimumBy(t *testing.T) {
 	quick.CheckProperties(t, map[string]any{
-		"`mainimumBy()` returns the min": func(xs []int, lastX int) bool {
+		"`minimumBy()` returns the min": func(xs []int, lastX int) bool {
 			nonemptySlice := append(xs, lastX)
 
 			min := lastX
@@ -80,6 +80,29 @@ func TestMinimumBy(t *testing.T) {
 
 			xl := FromGoSlice(nonemptySlice)
 			return MinimumBy(xl, comparator.OrderedComparator[int]) == min
+		},
+	})
+}
+
+func TestGroupBy(t *testing.T) {
+	quick.CheckProperties(t, map[string]any{
+		"Concat(GroupBy(xs, cmp)) should hold all elements": func(xs []int) bool {
+
+			cmp := comparator.CascadeComparator(comparator.OrderedComparator[int], func(x int) int { return x % 2 })
+
+			xl := FromGoSlice(xs)
+			return slicesElementsMatch(Concat(GroupBy(xl, cmp)).ToGoSlice(), xs)
+		},
+		`GroupBy(xs, cmp).All(\group -> group.All(\x -> cmp(x, group[0]) == 0))`: func(xs []int) bool {
+
+			cmp := comparator.CascadeComparator(comparator.OrderedComparator[int], func(x int) int { return x % 2 })
+
+			xl := FromGoSlice(xs)
+			return GroupBy(xl, cmp).All(func(group Slice[int]) bool {
+				return group.All(func(x int) bool {
+					return cmp(x, group[0]) == 0
+				})
+			})
 		},
 	})
 }
