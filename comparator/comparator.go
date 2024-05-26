@@ -1,7 +1,7 @@
 package comparator
 
 import (
-	"golang.org/x/exp/constraints"
+	"cmp"
 )
 
 type (
@@ -11,7 +11,7 @@ type (
 	Comparator[T any] func(l T, r T) int
 )
 
-func OrderedComparator[T constraints.Ordered](l T, r T) int {
+func OrderedComparator[T cmp.Ordered](l T, r T) int {
 	switch {
 	case l < r:
 		return -1
