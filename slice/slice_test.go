@@ -2,9 +2,12 @@ package slice
 
 import (
 	"reflect"
+	"slices"
 	"sort"
 	"strconv"
 	"testing"
+
+	"golang.org/x/exp/constraints"
 
 	"github.com/freebirdljj/immutable/comparator"
 	immutable_func "github.com/freebirdljj/immutable/func"
@@ -164,6 +167,35 @@ func TestSliceFilter(t *testing.T) {
 	})
 }
 
+func TestSlicePartition(t *testing.T) {
+	quick.CheckProperties(t, map[string]any{
+		"`satisfied` and `unsatisfied` should hold all elements": func(xs []int) bool {
+
+			predicate := func(x int) bool { return x%2 == 0 }
+
+			xl := FromGoSlice(xs)
+			satisfied, unsatisfied := xl.Partition(predicate)
+			return slicesElementsMatch(satisfied.Append(unsatisfied...).ToGoSlice(), xs)
+		},
+		"all elements in `satisfied` should satisfy `predicate`": func(xs []int) bool {
+
+			predicate := func(x int) bool { return x%2 == 0 }
+
+			xl := FromGoSlice(xs)
+			satisfied, _ := xl.Partition(predicate)
+			return satisfied.All(predicate)
+		},
+		"all elements in `unsatisfied` should unsatisfy `predicate`": func(xs []int) bool {
+
+			predicate := func(x int) bool { return x%2 == 0 }
+
+			xl := FromGoSlice(xs)
+			_, unsatisfied := xl.Partition(predicate)
+			return !unsatisfied.Any(predicate)
+		},
+	})
+}
+
 func TestSliceSort(t *testing.T) {
 	quick.CheckProperties(t, map[string]any{
 		"sort(xs) is sorted": func(xs []int) bool {
@@ -245,4 +277,17 @@ func TestSliceAny(t *testing.T) {
 
 func slicesEqual[T any](v1 []T, v2 []T) bool {
 	return (len(v1) == 0 && len(v2) == 0) || reflect.DeepEqual(v1, v2)
+}
+
+func slicesElementsMatch[T constraints.Ordered](xs []T, ys []T) bool {
+
+	sortedXs := make([]T, len(xs))
+	sortedYs := make([]T, len(ys))
+
+	copy(sortedXs, xs)
+	copy(sortedYs, ys)
+	slices.Sort(sortedXs)
+	slices.Sort(sortedYs)
+
+	return slicesEqual(sortedXs, sortedYs)
 }
