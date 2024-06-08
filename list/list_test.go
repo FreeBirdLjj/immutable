@@ -1,6 +1,7 @@
 package list
 
 import (
+	"cmp"
 	"math"
 	"reflect"
 	"sort"
@@ -198,6 +199,29 @@ func TestListFilter(t *testing.T) {
 	})
 }
 
+func TestListPartition(t *testing.T) {
+	quick.CheckProperties(t, map[string]any{
+		"`satisfied` and `unsatisfied` should hold all elements": func(xs []int) bool {
+			predicate := func(x int) bool { return x%2 == 0 }
+			xl := FromGoSlice(xs)
+			satisfied, unsatisfied := xl.Partition(predicate)
+			return listsElementsMatch(satisfied.Append(unsatisfied), xl)
+		},
+		"all elements in `satisfied` should satisfy `predicate`": func(xs []int) bool {
+			predicate := func(x int) bool { return x%2 == 0 }
+			xl := FromGoSlice(xs)
+			satisfied, _ := xl.Partition(predicate)
+			return satisfied.All(predicate)
+		},
+		"all elements in `unsatisfied` should satisfy `predicate`": func(xs []int) bool {
+			predicate := func(x int) bool { return x%2 == 0 }
+			xl := FromGoSlice(xs)
+			_, unsatisfied := xl.Partition(predicate)
+			return !unsatisfied.Any(predicate)
+		},
+	})
+}
+
 func TestListSort(t *testing.T) {
 	quick.CheckProperties(t, map[string]any{
 		"sort(xs) is sorted": func(xs []int) bool {
@@ -336,4 +360,9 @@ func TestListAny(t *testing.T) {
 
 func slicesEqual[T any](v1 []T, v2 []T) bool {
 	return (len(v1) == 0 && len(v2) == 0) || reflect.DeepEqual(v1, v2)
+}
+
+func listsElementsMatch[T cmp.Ordered](xs *List[T], ys *List[T]) bool {
+	comparator := comparator.OrderedComparator[T]
+	return xs.Sort(comparator).IsIsomorphicTo(ys.Sort(comparator), comparator)
 }
