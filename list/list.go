@@ -204,6 +204,10 @@ func (xs *List[T]) Filter(predicate func(T) bool) *List[T] {
 	})
 }
 
+func (xs *List[T]) Partition(predicate func(T) bool) (satisfied *List[T], unsatisfied *List[T]) {
+	return xs.Filter(predicate), xs.Filter(func(x T) bool { return !predicate(x) })
+}
+
 func (xs *List[T]) Sort(cmp comparator.Comparator[T]) *List[T] {
 
 	if xs == nil || xs.next == nil || xs.next == xs {
