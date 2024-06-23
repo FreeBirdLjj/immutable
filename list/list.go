@@ -78,6 +78,19 @@ func Foldr[T1 any, T2 any](xs *List[T1], init T2, f func(x T1, acc T2) T2) T2 {
 	)(init)
 }
 
+func GroupBy[T any](xs *List[T], cmp comparator.Comparator[T]) *List[*List[T]] {
+	resHead := List[*List[T]]{}
+	for res := &resHead; !xs.Empty(); res = res.next {
+		head := xs.value
+		headEqs, rest := xs.Partition(func(x T) bool { return cmp(head, x) == 0 })
+		res.next = &List[*List[T]]{
+			value: headEqs,
+		}
+		xs = rest
+	}
+	return resHead.next
+}
+
 func Concat[T any](xss *List[*List[T]]) *List[T] {
 	return maplist(xss, func(p *List[*List[T]]) *List[T] {
 		if p == nil {
