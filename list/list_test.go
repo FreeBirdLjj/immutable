@@ -75,6 +75,37 @@ func TestFoldr(t *testing.T) {
 	})
 }
 
+func TestGroupBy(t *testing.T) {
+	quick.CheckProperties(t, map[string]any{
+		"concat(groupBy(xs, cmp)) should hold all elements": func(xs []int) bool {
+
+			cmp := comparator.CascadeComparator(comparator.OrderedComparator[int], func(x int) int { return x % 2 })
+
+			xl := FromGoSlice(xs)
+			return listsElementsMatch(Concat(GroupBy(xl, cmp)), xl)
+		},
+		`groupBy(xs, cmp).all(\group -> group.all(\x -> cmp(x, group.head) == 0))`: func(xs []int) bool {
+
+			cmp := comparator.CascadeComparator(comparator.OrderedComparator[int], func(x int) int { return x % 2 })
+
+			xl := FromGoSlice(xs)
+			return GroupBy(xl, cmp).All(func(group *List[int]) bool {
+				return group.All(func(x int) bool {
+					return cmp(x, group.value) == 0
+				})
+			})
+		},
+		"groupBy(cycle(xs), cmp) == groupBy(xs, cmp).map(cycle)": func(xs []int, last int) bool {
+
+			cmp := comparator.CascadeComparator(comparator.OrderedComparator[int], func(x int) int { return x % 2 })
+
+			nonemptySlice := append(xs, last)
+			xl := FromGoSlice(nonemptySlice)
+			return slicesEqual(GroupBy(Cycle(xl), cmp).ToGoSlice(), Map(GroupBy(xl, cmp), Cycle).ToGoSlice())
+		},
+	})
+}
+
 func TestConcat(t *testing.T) {
 	quick.CheckProperties(t, map[string]any{
 		"concat([[]] * N) == []": func(n uint) bool {
