@@ -1,88 +1,62 @@
 package immutable_set
 
 import (
-	"math/rand"
-	"strings"
 	"testing"
-	"time"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/freebirdljj/immutable/comparator"
+	"github.com/freebirdljj/immutable/internal/quick"
 )
 
 func TestSetInsert(t *testing.T) {
+	quick.CheckProperties(t, map[string]any{
+		"should succeed to insert a new value": func(xs []string, x string) bool {
 
-	t.Parallel()
+			s := New(comparator.OrderedComparator[string])
 
-	t.Run("should succeed", func(t *testing.T) {
+			for _, value := range xs {
+				if value != x {
+					s, _ = s.Insert(value)
+				}
+			}
 
-		t.Parallel()
+			newS, affected := s.Insert(x)
+			return affected && newS.Has(x)
+		},
+		"should succeed to insert an existing value": func(xs []string, x string) bool {
 
-		r := rand.New(rand.NewSource(time.Now().UnixNano()))
-		values := []string{
-			"one",
-			"two",
-			"three",
-			"four",
-			"five",
-			"six",
-		}
+			s := New(comparator.OrderedComparator[string])
 
-		r.Shuffle(len(values), func(i int, j int) {
-			values[i], values[j] = values[j], values[i]
-		})
+			for _, value := range append(xs, x) {
+				s, _ = s.Insert(value)
+			}
 
-		s := New(strings.Compare)
-		for _, value := range values {
-			s, _ = s.Insert(value)
-		}
-
-		for _, value := range values {
-			assert.True(t, s.Has(value))
-		}
+			_, affected := s.Insert(x)
+			return !affected
+		},
 	})
 }
 
 func TestSetDelete(t *testing.T) {
+	quick.CheckProperties(t, map[string]any{
+		"should succeed to delete an existing value": func(xs []string, x string) bool {
 
-	t.Parallel()
+			s := FromValues(comparator.OrderedComparator[string], append(xs, x)...)
 
-	t.Run("should succeed", func(t *testing.T) {
+			newS, affected := s.Delete(x)
+			return affected && !newS.Has(x)
+		},
+		"should succeed to delete a non-existing value": func(xs []string, x string) bool {
 
-		t.Parallel()
+			s := New(comparator.OrderedComparator[string])
 
-		r := rand.New(rand.NewSource(time.Now().UnixNano()))
-		values := []string{
-			"one",
-			"two",
-			"three",
-			"four",
-			"five",
-			"six",
-			"seven",
-			"eight",
-		}
-
-		r.Shuffle(len(values), func(i int, j int) {
-			values[i], values[j] = values[j], values[i]
-		})
-
-		s := FromValues(strings.Compare, values...)
-
-		r.Shuffle(len(values), func(i int, j int) {
-			values[i], values[j] = values[j], values[i]
-		})
-
-		for i, value := range values {
-
-			s, _ = s.Delete(value)
-
-			for _, deletedValue := range values[:i+1] {
-				assert.False(t, s.Has(deletedValue))
+			for _, value := range xs {
+				if value != x {
+					s, _ = s.Insert(value)
+				}
 			}
 
-			for _, remainingValue := range values[i+1:] {
-				assert.True(t, s.Has(remainingValue))
-			}
-		}
+			newS, affected := s.Delete(x)
+			return !affected && newS == s
+		},
 	})
 }
