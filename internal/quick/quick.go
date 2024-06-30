@@ -3,8 +3,6 @@ package quick
 import (
 	"testing"
 	"testing/quick"
-
-	"github.com/stretchr/testify/require"
 )
 
 func CheckProperties(t *testing.T, properties map[string]any) {
@@ -18,7 +16,9 @@ func CheckProperties(t *testing.T, properties map[string]any) {
 			t.Parallel()
 
 			err := quick.Check(property, nil)
-			require.NoError(t, err)
+			if err != nil {
+				t.Fatal(err)
+			}
 		})
 	}
 }
