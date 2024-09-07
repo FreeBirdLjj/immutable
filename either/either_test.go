@@ -10,9 +10,105 @@ import (
 	"github.com/freebirdljj/immutable/internal/quick"
 )
 
+func TestBinaryMap(t *testing.T) {
+	quick.CheckProperties(t, map[string]any{
+		"BinaryMap(Identity, Identity, x) == x": func(isLeft bool, x int) bool {
+
+			maker := Left[int, int]
+			if !isLeft {
+				maker = Right[int]
+			}
+
+			either := maker(x)
+			return BinaryMap(immutable_func.Identity, immutable_func.Identity, either) == either
+		},
+		"BinaryMap((f . g), (h . i), x) == BinaryMap(f, h, BinaryMap(g, i, x))": func(isLeft bool, x int) bool {
+
+			maker := Left[int, int]
+			if !isLeft {
+				maker = Right[int]
+			}
+
+			f := func(x int) int { return x * 20 }
+			g := func(x int) int { return x * 30 }
+			h := func(x int) int { return x + 2 }
+			i := func(x int) int { return x + 4 }
+
+			either := maker(x)
+			return BinaryMap(
+				func(x int) int { return f(g(x)) },
+				func(x int) int { return h(i(x)) },
+				either,
+			) == BinaryMap(f, h, BinaryMap(g, i, either))
+		},
+	})
+}
+
+func TestMapLeft(t *testing.T) {
+	quick.CheckProperties(t, map[string]any{
+		"MapLeft(Identity, x) == x": func(isLeft bool, x int) bool {
+
+			maker := Left[int, int]
+			if !isLeft {
+				maker = Right[int]
+			}
+
+			either := maker(x)
+			return MapLeft(immutable_func.Identity, either) == either
+		},
+		"MapLeft(f . g), x) == MapLeft(f, MapLeft(g, x))": func(isLeft bool, x int) bool {
+
+			maker := Left[int, int]
+			if !isLeft {
+				maker = Right[int]
+			}
+
+			f := func(x int) int { return x * 20 }
+			g := func(x int) int { return x * 30 }
+
+			either := maker(x)
+			return MapLeft(
+				func(x int) int { return f(g(x)) },
+				either,
+			) == MapLeft(f, MapLeft(g, either))
+		},
+	})
+}
+
+func TestMapRight(t *testing.T) {
+	quick.CheckProperties(t, map[string]any{
+		"MapRight(Identity, x) == x": func(isLeft bool, x int) bool {
+
+			maker := Left[int, int]
+			if !isLeft {
+				maker = Right[int]
+			}
+
+			either := maker(x)
+			return MapRight(immutable_func.Identity, either) == either
+		},
+		"MapRight(f . g), x) == MapRight(f, MapRight(g, x))": func(isLeft bool, x int) bool {
+
+			maker := Left[int, int]
+			if !isLeft {
+				maker = Right[int]
+			}
+
+			f := func(x int) int { return x * 20 }
+			g := func(x int) int { return x * 30 }
+
+			either := maker(x)
+			return MapRight(
+				func(x int) int { return f(g(x)) },
+				either,
+			) == MapRight(f, MapRight(g, either))
+		},
+	})
+}
+
 func TestEitherToLeft(t *testing.T) {
 	quick.CheckProperties(t, map[string]any{
-		"Left(x).ToLeft(Konst(y)) == ": func(x string, y string) bool {
+		"Left(x).ToLeft(Konst(y)) == x": func(x string, y string) bool {
 			either := Left[int](x)
 			return either.ToLeft(immutable_func.Konst[int](y)) == x
 		},

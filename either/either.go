@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"runtime"
+
+	immutable_func "github.com/freebirdljj/immutable/func"
 )
 
 type (
@@ -44,6 +46,21 @@ func FromGoResult[ResultT any](res ResultT, err error) Either[error, ResultT] {
 
 func ToGoResult[ResultT any](res Either[error, ResultT]) (ResultT, error) {
 	return res.Right(), res.Left()
+}
+
+func BinaryMap[LeftT any, RightT any, LeftT2 any, RightT2 any](leftMapper func(LeftT) LeftT2, rightMapper func(RightT) RightT2, either Either[LeftT, RightT]) Either[LeftT2, RightT2] {
+	if either.IsLeft() {
+		return Left[RightT2](leftMapper(either.Left()))
+	}
+	return Right[LeftT2](rightMapper(either.Right()))
+}
+
+func MapLeft[LeftT any, RightT any, LeftT2 any](leftMapper func(LeftT) LeftT2, either Either[LeftT, RightT]) Either[LeftT2, RightT] {
+	return BinaryMap(leftMapper, immutable_func.Identity, either)
+}
+
+func MapRight[LeftT any, RightT any, RightT2 any](rightMapper func(RightT) RightT2, either Either[LeftT, RightT]) Either[LeftT, RightT2] {
+	return BinaryMap(immutable_func.Identity, rightMapper, either)
 }
 
 func (either *Either[_, _]) IsLeft() bool {
