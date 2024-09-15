@@ -96,20 +96,23 @@ func (rbTree *RBTree[Value]) Minimum() Value {
 
 func (rbTree *RBTree[Value]) Values() []Value {
 	values := []Value(nil)
-	rbTree.InorderTraversal(
-		func(value Value) {
+	rbTree.InorderTraversal()(
+		func(value Value) bool {
 			values = append(values, value)
+			return true
 		},
 	)
 	return values
 }
 
-func (rbTree *RBTree[Value]) InorderTraversal(visitor func(value Value)) {
-	rbTree.root.inorderTraversal(
-		func(n *node[Value]) {
-			visitor(n.value)
-		},
-	)
+func (rbTree *RBTree[Value]) InorderTraversal() func(yield func(value Value) bool) {
+	return func(yield func(value Value) bool) {
+		rbTree.root.inorderTraversal()(
+			func(n *node[Value]) bool {
+				return yield(n.value)
+			},
+		)
+	}
 }
 
 // `newTree` returned by `Insert()` is always different from the original one.
@@ -206,15 +209,31 @@ func (n *node[Value]) lookup(cmp comparator.Comparator[Value], value Value) *Val
 	}
 }
 
-func (n *node[Value]) inorderTraversal(visitor func(n *node[Value])) {
+func (n *node[Value]) inorderTraversal() func(yield func(n *node[Value]) bool) {
+	return func(yield func(n *node[Value]) bool) {
 
-	if n == nil {
-		return
+		if n == nil {
+			return
+		}
+
+		for _, iter := range []func(func(*node[Value]) bool){
+			n.children[directionLeft].inorderTraversal(),
+			func(f func(*node[Value]) bool) { f(n) },
+			n.children[directionRight].inorderTraversal(),
+		} {
+			// `shouldContinue` should default to `true`, otherwise an `iter` over no nodes would cause an unexpected return.
+			shouldContinue := true
+
+			iter(func(n *node[Value]) bool {
+				shouldContinue = yield(n)
+				return shouldContinue
+			})
+
+			if !shouldContinue {
+				return
+			}
+		}
 	}
-
-	n.children[directionLeft].inorderTraversal(visitor)
-	visitor(n)
-	n.children[directionRight].inorderTraversal(visitor)
 }
 
 // Only `balance` non-leaf node.
