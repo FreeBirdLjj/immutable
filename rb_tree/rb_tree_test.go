@@ -1,6 +1,7 @@
 package immutable_rb_tree
 
 import (
+	"reflect"
 	"slices"
 	"testing"
 
@@ -93,6 +94,44 @@ func TestRBTreeMinimum(t *testing.T) {
 
 			rbTree := FromValues(comparator.OrderedComparator[int], nonemptySlice...)
 			return rbTree.Minimum() == min
+		},
+	})
+}
+
+func TestRBTreeInorderTraversal(t *testing.T) {
+	quick.CheckProperties(t, map[string]any{
+		"rbTree.InorderTraversal(Konst(false)) should only iterate over at most 1 value": func(xs []int, lastX int) bool {
+
+			nonemptySlice := append(xs, lastX)
+
+			rbTree := FromValues(comparator.OrderedComparator[int], nonemptySlice...)
+
+			cnt := 0
+			rbTree.InorderTraversal()(func(value int) bool {
+				cnt++
+				return false
+			})
+
+			return cnt == 1
+		},
+		"rbTree.InorderTraversal(Konst(true)) should iterate over all values": func(xs []int, lastX int) bool {
+
+			nonemptySlice := append(xs, lastX)
+
+			allValues := make(map[int]struct{}, len(nonemptySlice))
+			for _, value := range nonemptySlice {
+				allValues[value] = struct{}{}
+			}
+
+			rbTree := FromValues(comparator.OrderedComparator[int], nonemptySlice...)
+
+			visited := make(map[int]struct{}, len(nonemptySlice))
+			rbTree.InorderTraversal()(func(value int) bool {
+				visited[value] = struct{}{}
+				return true
+			})
+
+			return reflect.DeepEqual(visited, allValues)
 		},
 	})
 }
