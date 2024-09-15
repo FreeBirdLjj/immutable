@@ -10,7 +10,7 @@ permissions:
 jobs:
   set-matrix:
 
-    name: set-matrix
+    name: set matrix
     runs-on: ubuntu-latest
     strategy:
       matrix:
