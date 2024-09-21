@@ -94,6 +94,11 @@ func (rbTree *RBTree[Value]) Minimum() Value {
 	}
 }
 
+// `All()` Returns an iterator of all values in an in-order traversal.
+func (rbTree *RBTree[Value]) All() func(yield func(value Value) bool) {
+	return rbTree.InorderTraversal()
+}
+
 func (rbTree *RBTree[Value]) Values() []Value {
 	values := []Value(nil)
 	rbTree.InorderTraversal()(
