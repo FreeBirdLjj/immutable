@@ -18,6 +18,10 @@ func FromValues[Value any](cmp comparator.Comparator[Value], values ...Value) *S
 	return (*Set[Value])(immutable_rb_tree.FromValues(cmp, values...))
 }
 
+func (s *Set[Value]) All() func(yield func(value Value) bool) {
+	return s.rbTree().All()
+}
+
 func (s *Set[Value]) Values() []Value {
 	return s.rbTree().Values()
 }
