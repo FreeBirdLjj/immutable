@@ -66,6 +66,15 @@ func (m *Map[Key, Value]) Index(key Key) (value Value, has bool) {
 	return kv.Value, true
 }
 
+func (m *Map[Key, Value]) All() func(yield func(key Key, value Value) bool) {
+	rbTreeIter := m.rbTree().All()
+	return func(yield func(key Key, value Value) bool) {
+		rbTreeIter(func(kvPair KeyValuePair[Key, Value]) bool {
+			return yield(kvPair.Key, kvPair.Value)
+		})
+	}
+}
+
 func (m *Map[Key, Value]) KeyValuePairs() []KeyValuePair[Key, Value] {
 	return m.rbTree().Values()
 }
