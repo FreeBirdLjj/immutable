@@ -7,6 +7,7 @@ import (
 
 	"github.com/freebirdljj/immutable/comparator"
 	"github.com/freebirdljj/immutable/internal/quick"
+	"github.com/freebirdljj/immutable/tuple"
 )
 
 func TestMapInsert(t *testing.T) {
@@ -31,7 +32,7 @@ func TestMapInsert(t *testing.T) {
 			xStr := formatter(x)
 			newM, affected := m.Insert(x, xStr)
 			return affected &&
-				slices.Contains(newM.KeyValuePairs(), KeyValuePair[int, string]{Key: x, Value: xStr})
+				slices.Contains(newM.KeyValuePairs(), tuple.KeyValuePair[int, string]{Key: x, Value: xStr})
 		},
 		"should succeed to update an existing key": func(xs []int, x int) bool {
 
@@ -47,8 +48,8 @@ func TestMapInsert(t *testing.T) {
 			newM, affected := m.Insert(x, newValue)
 			kvs := newM.KeyValuePairs()
 			return !affected &&
-				slices.Contains(kvs, KeyValuePair[int, string]{Key: x, Value: newValue}) &&
-				!slices.Contains(kvs, KeyValuePair[int, string]{Key: x, Value: formatter(x)})
+				slices.Contains(kvs, tuple.KeyValuePair[int, string]{Key: x, Value: newValue}) &&
+				!slices.Contains(kvs, tuple.KeyValuePair[int, string]{Key: x, Value: formatter(x)})
 		},
 	})
 }
@@ -67,7 +68,7 @@ func TestMapDelete(t *testing.T) {
 
 			newM, affected := m.Delete(x)
 			return affected &&
-				!slices.Contains(newM.KeyValuePairs(), KeyValuePair[int, string]{Key: x, Value: formatter(x)})
+				!slices.Contains(newM.KeyValuePairs(), tuple.KeyValuePair[int, string]{Key: x, Value: formatter(x)})
 		},
 		"should succeed to delete a non-existing key-value pair": func(xs []int, x int) bool {
 

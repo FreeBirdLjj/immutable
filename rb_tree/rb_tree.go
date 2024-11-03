@@ -6,7 +6,11 @@
 package immutable_rb_tree
 
 import (
+	"iter"
+	"slices"
+
 	"github.com/freebirdljj/immutable/comparator"
+	immutable_iter "github.com/freebirdljj/immutable/iter"
 )
 
 type (
@@ -95,7 +99,7 @@ func (rbTree *RBTree[Value]) Minimum() Value {
 }
 
 // `All()` Returns an iterator of all values in an in-order traversal.
-func (rbTree *RBTree[Value]) All() func(yield func(value Value) bool) {
+func (rbTree *RBTree[Value]) All() iter.Seq[Value] {
 	return rbTree.InorderTraversal()
 }
 
@@ -110,14 +114,13 @@ func (rbTree *RBTree[Value]) Values() []Value {
 	return values
 }
 
-func (rbTree *RBTree[Value]) InorderTraversal() func(yield func(value Value) bool) {
-	return func(yield func(value Value) bool) {
-		rbTree.root.inorderTraversal()(
-			func(n *node[Value]) bool {
-				return yield(n.value)
-			},
-		)
-	}
+func (rbTree *RBTree[Value]) InorderTraversal() iter.Seq[Value] {
+	return immutable_iter.Map(
+		rbTree.root.inorderTraversal(),
+		func(n *node[Value]) Value {
+			return n.value
+		},
+	)
 }
 
 // `newTree` returned by `Insert()` is always different from the original one.
@@ -214,31 +217,15 @@ func (n *node[Value]) lookup(cmp comparator.Comparator[Value], value Value) *Val
 	}
 }
 
-func (n *node[Value]) inorderTraversal() func(yield func(n *node[Value]) bool) {
-	return func(yield func(n *node[Value]) bool) {
-
-		if n == nil {
-			return
-		}
-
-		for _, iter := range []func(func(*node[Value]) bool){
-			n.children[directionLeft].inorderTraversal(),
-			func(f func(*node[Value]) bool) { f(n) },
-			n.children[directionRight].inorderTraversal(),
-		} {
-			// `shouldContinue` should default to `true`, otherwise an `iter` over no nodes would cause an unexpected return.
-			shouldContinue := true
-
-			iter(func(n *node[Value]) bool {
-				shouldContinue = yield(n)
-				return shouldContinue
-			})
-
-			if !shouldContinue {
-				return
-			}
-		}
+func (n *node[Value]) inorderTraversal() iter.Seq[*node[Value]] {
+	if n == nil {
+		return immutable_iter.Empty[*node[Value]]()
 	}
+	return immutable_iter.Concat(slices.Values([]iter.Seq[*node[Value]]{
+		n.children[directionLeft].inorderTraversal(),
+		immutable_iter.Singleton(n),
+		n.children[directionRight].inorderTraversal(),
+	}))
 }
 
 // Only `balance` non-leaf node.

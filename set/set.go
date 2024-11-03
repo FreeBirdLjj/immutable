@@ -1,6 +1,8 @@
 package immutable_set
 
 import (
+	"iter"
+
 	"github.com/freebirdljj/immutable/comparator"
 	immutable_rb_tree "github.com/freebirdljj/immutable/rb_tree"
 )
@@ -18,7 +20,7 @@ func FromValues[Value any](cmp comparator.Comparator[Value], values ...Value) *S
 	return (*Set[Value])(immutable_rb_tree.FromValues(cmp, values...))
 }
 
-func (s *Set[Value]) All() func(yield func(value Value) bool) {
+func (s *Set[Value]) All() iter.Seq[Value] {
 	return s.rbTree().All()
 }
 
