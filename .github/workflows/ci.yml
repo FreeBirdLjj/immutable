@@ -17,7 +17,7 @@ jobs:
         data:
           - # shared matrix starts here:
             go-version:
-              - "1.21"
+              - "1.23"
     outputs:
       matrix: ${{ toJSON(matrix.data) }}
 
